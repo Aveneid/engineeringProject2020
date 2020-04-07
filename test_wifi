@@ -11,6 +11,8 @@
       TLSv1.2 is supported since version 2.4.0-rc1
     Created by Ivan Grokhotkov, 2015.
     This example is in public domain.
+    
+    https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi/examples
 */
 
 #include <ESP8266WiFi.h>
