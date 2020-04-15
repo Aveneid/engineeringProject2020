@@ -19,17 +19,17 @@ bool light = true;
 
 void setup(){
   Serial.begin(9600);
-  pinMode(13,OUTPUT);
-  digitalWrite(13,light);
+  pinMode(12,OUTPUT);
+  digitalWrite(12,light);
 }
   
 void loop(){
   char key = keypad.getKey();
+  if(key != NO_KEY)
   if(key == '&'){
   light = !light;
-  digitalWrite(13,light);
-  
+  digitalWrite(12,light);
   }else{
-    Serial.println(key);
+    Serial.print(key);
   }
 }
