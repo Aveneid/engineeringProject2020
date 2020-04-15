@@ -1,7 +1,7 @@
-#include <Adafruit_PN532.h>
-#include <EEPROM.h>   //eeprom do przechowywania dancych jak kod dostepu i znane karty nfc
+#include <Adafruit_PN532.h>       //biblioteka do obslugi modulu RFID
+#include <EEPROM.h>               //eeprom do przechowywania dancych jak kod dostepu i znane karty nfc
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>  //do obslugi wyswietlacza
+#include <LiquidCrystal_I2C.h>    //do obslugi wyswietlacza
 #include "esppins.h"
 
 #define OUTPIN D5
