@@ -1,3 +1,5 @@
+//Plik naglowkowy definiujacy numery pinow opoisanych na plytce z numerami pinow w mikrokontrolerze
+
 #define D0 16
 #define D1 5
 #define D2 4
