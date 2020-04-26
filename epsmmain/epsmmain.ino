@@ -1,10 +1,10 @@
-# include < WiFi.h >
-# include < LiquidCrystal_I2C.h >
-# include < Wire.h >
-# include < Adafruit_PN532.h >
-# include < EEPROM.h >
-# include "esppins.h"
-# include < ESP8266WebServer.h >
+#include <WiFi.h>
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+#include <Adafruit_PN532.h>
+#include <EEPROM.h>
+#include "esppins.h"
+#include <ESP8266WebServer.h>
 
 /***
   EEPROM  DATA SCHEMA
@@ -22,20 +22,20 @@
   +--------------------------+---------------+
  **/
 
-# define FIRSTRUN 0
-# define ADMINPASS 1
-# define NFCENABLED 9
-# define PASSENABLED 10
-# define PINCODE 11
-# define MASTERCARDID 19
-# define USERCARDSCOUNT 23
-# define USERCARDS 24
+#define FIRSTRUN 0
+#define ADMINPASS 1
+#define NFCENABLED 9
+#define PASSENABLED 10
+#define PINCODE 11
+#define MASTERCARDID 19
+#define USERCARDSCOUNT 23
+#define USERCARDS 24
 
-# define OUT D5
-# define CARDSIZE 4
+#define OUT D5
+#define CARDSIZE 4
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);          //create object for LCD class
-ESP8266WebServer server(80);            //enable server on port 80
+//ESP8266WebServer server(80);            //enable server on port 80
 
 ///NFC CONFIG
 //rq rst
@@ -106,9 +106,9 @@ bool findCard(uint8_t a[4]) {
 
   for (int i = 0; i < cardsCount; i++) {
     for (int j = 0; j < 4; j++)
-      cards[j] = EEPROM.read(USERCARDS + CARDSIZE * i + j);
+      card[j] = EEPROM.read(USERCARDS + CARDSIZE * i + j);
 
-    if (arrcmp(cards, a))
+    if (arrcmp(card, a))
       return true;
   }
   return false;
@@ -131,6 +131,9 @@ void clearData() {                    //perform EEPROM clear and fill with defau
   lcd.clear();
 }
 
+void accessGranted(){}
+void accessDenied(){}
+
 void setup() {
 
   Serial.begin(9600);                 //serial for keyboard
@@ -152,7 +155,8 @@ void setup() {
     firstRunConfig();
   }
 
-  onesecond = millis();
+  t1 = millis();
+  t2 = millis();
 }
 
 void firstRunConfig() {
@@ -212,11 +216,11 @@ void firstRunConfig() {
   EEPROM.commit();
 }
 
-WiFiClient client;
+//WiFiClient client;
 
 void loop() {
   if (millis() - t1 >= 1000) {
-    client = server.available();                  //check for new request on port 80
+//    client = server.available();                  //check for new request on port 80
     t1 = millis();
   }
 
@@ -224,7 +228,7 @@ void loop() {
   if (millis() - t2 >= 500)                 // check for new card
   {
     nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen);
-    if (arrcmp(uid, MasterID) {
+    if (arrcmp(uid, MasterID)) {
     MasterAccess = true;
     lcd.clear();
       uid[0] = 0;
@@ -263,7 +267,7 @@ void loop() {
     }
   } else {
     if (cfg[0]) {                 //NFC ENABLED
-      if (findCard(uid)
+      if (findCard(uid))
           accessGranted();
           else
             accessDenied();
