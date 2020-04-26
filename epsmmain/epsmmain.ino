@@ -1,328 +1,253 @@
- # include < Adafruit_PN532.h > //biblioteka do obslugi modulu RFID
- # include < EEPROM.h > //eeprom do przechowywania dancych jak kod dostepu i znane karty nfc
+ # include < WiFi.h >
+ # include < LiquidCrystal_I2C.h >
  # include < Wire.h >
- # include < LiquidCrystal_I2C.h > //do obslugi wyswietlacza
+ # include < Adafruit_PN532.h > 
+ # include < EEPROM.h >
  # include "esppins.h"
+ # include < ESP8266WebServer.h >
 
- # define OUTPIN D5
- # define CARDSIZE 4 * (sizeof(uint8_t))
+/***
+EEPROM  DATA SCHEMA
++--------------------------+---------------+
+|      Variable name       | Offset(bytes) |
++--------------------------+---------------+
+| firstRun                 |             0 |
+| adminPass                |             1 |
+| nfcEnabled               |             9 |
+| passEnabled              |            10 |
+| pinCode                  |            11 |
+| masterCardID             |            17 |
+| userCardsCount           |            21 |
+| userCards (each 4 bytes) |            22 |
++--------------------------+---------------+
+ **/
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+ # define FIRSTRUN 0
+ # define ADMINPASS 1
+ # define NFCENABLED 9
+ # define PASSENABLED 10
+ # define PINCODE 11
+ # define MASTERCARDID 19
+ # define USERCARDSCOUNT 23
+ # define USERCARDS 24
+
+ # define OUT D5
+ # define CARDSIZE 4
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);					//create object for LCD class
+ESP8266WebServer server(80);						//enable server on port 80
+
+///NFC CONFIG
 //rq rst
 Adafruit_PN532 nfc(D8, D7);
-bool firstRun = true;
 
-bool masterCardAccess = false;
 
-uint8_t success = 0;
-uint8_t uid[] = {
-    0,
-    0,
-    0,
-    0
-};
-uint8_t uidLen;
-/**
-EEPROM SCHEMA:
+bool cfg[2]; 										// disable pin, disable nfc,
+bool MasterAccess = false;							//master access flag
+uint8_t MasterID[4];								//master card ID - to prevent future reads from eeprom to save some time and power
+unsigned long t1;									//counter for wifi 
+unsigned long t2;									//counter for card scanner
 
-fisrt run | cards count | master card | password | available_cards
-bool        int        4 x uint8_t     4 x char   4 x uint8_t
-(2bytes)    (4 bytes)    (4 bytes)      (4bytes)    each 4 bytes
+void blk() {										//blink display
+    lcd.noBacklight();
+    delay(100);
+    lcd.backlight();
+}
 
- **/
-int masterAddr = sizeof(bool) + 4;
-int passAddr = masterAddr + 4 * sizeof(uint8_t);
-int cardsAddr = passAddr + 4 * sizeof(char);
+bool arrcmp(uint8_t a[4], uint8_t b[4]) {			//compare two arrays - type uint8_t - check cards ids
+    for (int i = 0; i > 4; i++)
+        if (a[i] != b[i])
+            return false;
+    return true;
+}
 
-char passW[6];
-int passIndex = 0;
+bool addDeleteCard(uint8_t a[4]) {	
+			
+    /***
+	
+    returns true if card found and deleted
+    return false if card not found and added
+     
+	***/
+	 
+    uint8_t cardsCount = EEPROM.read(USERCARDSCOUNT);
+    uint8_t cards[cardsCount][4];
+
+    for (int i = 0; i < cardsCount; i++)
+        for (int j = 0; i < 4; j++)
+            cards[i][j] = EEPROM.read(USERCARDS + CARDSIZE * i + j);
+
+    for (int i = 0; i < cardsCount; i++)
+        if (arrcmp(cards[i], a)) {
+            cards[i][0] = cards[cardsCount][0];
+            cards[i][1] = cards[cardsCount][1];
+            cards[i][2] = cards[cardsCount][2];
+            cards[i][3] = cards[cardsCount][3];
+            EEPROM.put(USERCARDSCOUNT, cardsCount--);
+            for (int j = 0; j < cardsCount; j++)
+                for (int k = 0; k < 4; k++)
+                    EEPROM.put(USERCARDS + j * CARDSIZE + k, cards[j][k]);
+            EEPROM.commit();
+            return true;
+        }
+    for (int k = 0; k < 4; k++)
+        EEPROM.put(USERCARDS + CARDSIZE * cardsCount + k, a[k]);
+    EEPROM.put(USERCARDSCOUNT, cardsCount++);
+    EEPROM.commit();
+    return false;
+}
+
+void clearData() {										//perform EEPROM clean - fill with default values
+    for (int i = 0; i < EEPROM.length(); i++)
+        EEPROM.put(i, 0);
+    
+	EEPROM.put(0, 1);   								//first config flag
+	
+	EEPROM.put(1, 'a');EEPROM.put(2, 'd');EEPROM.put(3, 'm');EEPROM.put(4, 'i');EEPROM.put(5, 'n'); //default admin password for web server 
+	
+	EEPROM.put(9,1);									//enable nfc
+	EEPROM.put(10,1);									//enable password
+	
+    lcd.print("RESETTING...");
+    EEPROM.commit();									//write changes to EEPROM
+	delay(1000);
+    lcd.clear();
+}
 
 void setup() {
-    EEPROM.begin(512);
-    Serial.begin(9600);
-    nfc.begin();
-    nfc.SAMConfig();
+
+    Serial.begin(9600); 								//serial for keyboard
+    EEPROM.begin(512); 									//eeprom for config and data
+
     lcd.init();
     lcd.backlight();
-    lcd.clear();
-    pinMode(OUTPIN, OUTPUT);
 
-    //EEPROM.get(0,firstRun);
-    if (firstRun) {
-        lcd.print("First run config");
-        lcd.setCursor(0, 1);
-        masterCard();
-        delay(3000);
-        lcd.clear();
-        initPassword();
-        //firstRun = false;
+    nfc.begin();
+    nfc.SAMConfig();
+
+    pinMode(D4, INPUT);
+    pinMode(OUT, OUTPUT);
+	
+    if (!digitalRead(D4))
+        clearData();
+
+    if(EEPROM.read(0) == 1){
+    firstRunConfig();
     }
-
+    
+	onesecond = millis();
 }
-//setup stuff
-void masterCard() {
+
+void firstRunConfig() {
     lcd.print("Scan master card");
+    uint8_t uidLen = 0,
+    uid[4];
+
+    //wait for card
     while (uidLen < 1) {
-        success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen);
+        nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen);
     }
+
     lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Card scanned");
+    lcd.print("Master ID:");
     lcd.setCursor(0, 1);
-    lcd.print("ID:");
-    for (uint8_t i = 0; i < uidLen; i++) {
+    for (int i = 0; i < 4; i++)
         lcd.print(uid[i]);
-        EEPROM.put(masterAddr + i * sizeof(uint8_t), uid[i]);
-    }
-    delay(1000);
-    lcd.clear();
-    /*
-    for (uint8_t i = 0; i < uidLen; i++)
-    lcd.print((uint8_t)EEPROM.read(sizeof(bool) + i * sizeof(uint8_t)));*/
-    memset(uid, 0, sizeof(uid));
-    uidLen = 0;
-
-}
-void initPassword() {
-    char c;
-    char password[4];
-    short passIndex = 0;
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Enter pass: ");
-    lcd.setCursor(0, 1);
-    while (1) {
-        if (passIndex < 4) {
-            if (Serial.available()) {
-                c = Serial.read();
-                switch (c) {
-                case '0':
-                    password[passIndex] = '0';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '1':
-                    password[passIndex] = '1';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '2':
-                    password[passIndex] = '2';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '3':
-                    password[passIndex] = '3';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '4':
-                    password[passIndex] = '4';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '5':
-                    password[passIndex] = '5';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '6':
-                    password[passIndex] = '6';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '7':
-                    password[passIndex] = '7';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '8':
-                    password[passIndex] = '8';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '9':
-                    password[passIndex] = '9';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case 'C':
-                    passIndex--;
-                    lcd.setCursor(passIndex, 1);
-                    lcd.print(" ");
-                    lcd.setCursor(passIndex, 1);
-                    break;
-                default:
-                    break;
-                }
-            }
-        } else
-            break;
-    }
-
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Password is:");
-    lcd.setCursor(0, 1);
+    Serial.println();
     for (int i = 0; i < 4; i++) {
-        lcd.print(password[i]);
-        EEPROM.put(passAddr + i * sizeof(char), password[i]);
+        Serial.print(uid[i]);
+        EEPROM.put(MASTERCARDID + i, uid[i]);
+        MasterID[i] = uid[i];
     }
     delay(3000);
+    blk();
     lcd.clear();
-}
-void accessGranted() {
-    lcd.clear();
-    lcd.print("ACCESS GRANTED");
-
-    passIndex = 0;
-    memset(uid, 0, sizeof(uid));
-    delay(3000);
-    lcd.clear();
-}
-void accessDenied() {
-    lcd.clear();
-    lcd.print("Access denied");
-
-    passIndex = 0;
-    memset(uid, 0, sizeof(uid));
-    delay(3000);
-    lcd.clear();
-}
-//check password
-int checkPass(char p[4]) {
-    for (int i = 0; i < 4; i++)
-        if (p[i] != EEPROM.read(passAddr + i * sizeof(char)))
-            return 0;
-    return 1;
-}
-// check master card
-int checkCardMaster(uint8_t c[4]) {
-    for (int i = 0; i < 4; i++)
-        if (c[i] != EEPROM.read(sizeof(bool) + i * sizeof(uint8_t)))
-            return 0;
-    return 1;
-}
-int addRemoveCard(uint8_t c[4]) {
-    //get cards count
-    int cardsCount = EEPROM.read(sizeof(bool));
-
-    uint8_t cards[cardsCount][4];
-    bool found = false;
-    uint8_t index;
-
-    //get all cards
-    for (int i = 0; i < cardsCount; i++)
-        for (int j = 0; j < 4; j++)
-            cards[i][j] = EEPROM.read(cardsAddr + i * CARDSIZE + j * sizeof(uint8_t));
-
-    //check if card exists
-    for (int i = 0; i < cardsCount; i++)
-        if (cards[i] == c) {
-            i = cardsCount;
-            index = i;
-            found = true;
-        }
-
-    if (!found) {
-        //if not exists then add
-        EEPROM.put(sizeof(bool), cardsCount + 1);
-
-        for (int i = 0; i < 4; i++)
-            EEPROM.put(cardsAddr + cardsCount * CARDSIZE + i * sizeof(uint8_t), c[i]);
-
-        lcd.clear();
-        lcd.print("Card added");
-        lcd.setCursor(0, 1);
-        lcd.print("ID:");
-        for (int i = 0; i < 4; i++)
-            lcd.print(c[i]);
-        return 1;
-    } else {
-        // if exists then delete
-        cards[i] = cards[cardsCount];
-        EEPROM.put(sizeof(bool), cardsCount--);
-        lcd.print("Card deleted");
-		return -1;
-    }
-	return 0;
-}
-
-void loop() {
-    //lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Enter pass:");
+    lcd.print("Enter PIN: ");
     lcd.setCursor(0, 1);
-
-    for (int i = 0; i < passIndex; i++)
-        lcd.print("X");
-    if (Serial.available()) {
-        char c = Serial.read();
-        if (c != 'O') {
-            if (passIndex < 6)
-                switch (c) {
-                case '0':
-                    passW[passIndex] = '0';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '1':
-                    passW[passIndex] = '1';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '2':
-                    passW[passIndex] = '2';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '3':
-                    passW[passIndex] = '3';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '4':
-                    passW[passIndex] = '4';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '5':
-                    passW[passIndex] = '5';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '6':
-                    passW[passIndex] = '6';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '7':
-                    passW[passIndex] = '7';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '8':
-                    passW[passIndex] = '8';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case '9':
-                    passW[passIndex] = '9';
-                    passIndex++;
-                    lcd.print("X");
-                    break;
-                case 'C':
-                    passIndex--;
-                    lcd.setCursor(passIndex, 1);
-                    lcd.print(" ");
-                    lcd.setCursor(passIndex, 1);
-                    break;
-                }
-        } else {
-            if (checkPass(passW))
-                accessGranted();
-            else
-                accessDenied();
+    String password = "";
+    char c;
+    lcd.setCursor(0, 1);
+    Serial.println(password.length());
+    while (password.length() < 8) {
+        if (Serial.available()) {
+            c = Serial.read();
+            Serial.println(c);
+            if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9') {
+                password += c;
+                lcd.print(c);
+                Serial.println(password);
+            } else if (c == 'C') {
+                password = password.substring(password.length() - 1);
+                lcd.setCursor(0, 1);
+                lcd.print("                        ");
+                for (int i = 0; i < password.length(); i++)
+                 lcd.print(password);   
+				//lcd.print("X");
+            } else if (c == 'O') {
+                EEPROM.put(PINCODE, password);
+                lcd.clear();
+                lcd.print("Password saved");
+                lcd.print(password);
+                EEPROM.put(FIRSTRUN,0);
+                break;
+            }
         }
-    } else {}
+    }
+    EEPROM.commit();
+}
+
+WiFiClient client;
+void loop() {
+    uint8_t uidLen, uid[4];
+    if (millis() - t1 >= 1000) {
+        client = server.available(); //check for new request on port 80
+        t1 = millis();
+    }
+	if(millis() - t2 >= 500)
+	{
+		 nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen);
+		
+	}
+
+    if (client & client.connected() & client.available()) { //if there is client
+        client.println("HTTP/1.1 200 OK");
+        client.println("Content-type:text/html");
+        client.println("Connection: close");
+        client.println();
+
+    }
+
+    if (MasterAccess) {
+        lcd.clear();
+        lcd.print("Scan card to ");
+        lcd.setCursor(0, 1);
+        lcd.print("add or delete");
+        while (uidLen < 1) {
+            if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen) {
+                if (!arrcmp(MasterID, uid)) {
+                    if (addDeleteCard(uid))
+                        lcd.
+
+                }
+
+            }
+        }
+
+    } else {
+
+        if (cfg[0]) { //NFC ENABLED
+            uint8_t uidLen = 0,
+            uid[4];
+            if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen) {
+                if (arrcmp(uid, EEPROM.read(MASTERCARDID)) {
+                    MasterAccess = true;
+                    lcd.clear();
+                }
+                    if (
+            }
+        }
+        if (cfg[1]) { //PIN CODE ENABLED
+
+        }
+    }
 }
