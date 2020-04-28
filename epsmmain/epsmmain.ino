@@ -52,6 +52,8 @@ unsigned long retryTimer;
 int retryTimerSeconds = 0;
 uint8_t tries = 0;
 uint8_t uid[4], uidLen;               //card data
+String password = "";                //password holder
+char c;                            //incoming character holder
 
 
 void blk() {                    //blink display
@@ -68,7 +70,7 @@ bool arrcmp(uint8_t a[4], uint8_t b[4]) {     //compare two arrays - type uint8_
 }
 
 bool addDeleteCard(uint8_t a[4]) {
-
+  uidLen = 0;
   /***
 
     returns true if card found and deleted
@@ -105,6 +107,7 @@ bool addDeleteCard(uint8_t a[4]) {
 }
 
 bool findCard(uint8_t a[4]) {
+  uidLen = 0;
   uint8_t cardsCount = EEPROM.read(USERCARDSCOUNT);
   uint8_t card[4];
 
@@ -116,6 +119,7 @@ bool findCard(uint8_t a[4]) {
       return true;
   }
   return false;
+
 }
 
 void clearData() {                    //perform EEPROM clear and fill with default values
@@ -135,21 +139,39 @@ void clearData() {                    //perform EEPROM clear and fill with defau
 void accessGranted() {
   lcd.clear();
   lcd.print("ACCESS GRANTED");
-  digitalWrite(OUT, HIGH);
-  delay(5000);
-  digitalWrite(OUT, LOW);
+
   tries = 0;
   retryTimerSeconds = 0;
   retryTimer = 0;
+  password = "";
+
+  digitalWrite(OUT, HIGH);
+  delay(5000);
+  digitalWrite(OUT, LOW);
 }
 void accessDenied() {
   lcd.clear();
   lcd.print("ACCESS DENIED");
-  delay(5000);
+  password = "";
+
   tries++;
   if (tries == 3) retryTimer = millis();
+  delay(5000);
 }
 
+
+void checkPass(String pass) {
+  String mainPass;
+  for (int i = 0; i < 8; i++) {
+    char c = EEPROM.read(PINCODE + i);
+    if (c != '\0')
+      mainPass += EEPROM.read(PINCODE + i);
+    else break;
+  }
+  if (strcmp(mainPass, pass) == 0)
+    return true;
+  return false;
+}
 void setup() {
   Serial.begin(9600);                 //serial for keyboard
   EEPROM.begin(512);                  //eeprom for config and data
@@ -196,8 +218,8 @@ void firstRunConfig() {
   lcd.print("Enter PIN: ");
   lcd.setCursor(0, 1);
 
-  String password = "";
-  char c;
+
+
   lcd.setCursor(0, 1);
 
   while (1) {
@@ -234,14 +256,12 @@ void firstRunConfig() {
 //WiFiClient client;
 
 void loop() {
-  if (tries < 3) {
+  if (tries < 3) {                                                    //if
     if (millis() - t1 >= 1000) {
-      //    client = server.available();                  //check for new request on port 80
+      //    client = server.available();                                                  //check for new request on port 80
       t1 = millis();
     }
-
-
-    if (millis() - t2 >= 500)                 // check for new card
+    if (millis() - t2 >= 500)                                                             // check for new card
     {
       nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen);
       if (arrcmp(uid, MasterID)) {
@@ -268,12 +288,12 @@ void loop() {
         if (addDeleteCard(uid)) {           //card deleted
           lcd.clear();
           lcd.print("Card deleted");
-        } else {                  //card added
+        } else {                                                        //card added
           lcd.clear();
           lcd.print("Card added");
         }
         delay(500);
-      } else {                  //master card scanned - exit from masterMode
+      } else {                                                         //master card scanned - exit from masterMode
         lcd.clear();
         lcd.print("EXITING....");
         MasterAccess = false;
@@ -282,14 +302,35 @@ void loop() {
         return;
       }
     } else {
-      if (cfg[0]) {                 //NFC ENABLED
-        if (findCard(uid))
-          accessGranted();
-        else
-          accessDenied();
+      if (cfg[0]) {                                                   //NFC ENABLED
+        if (uidLen != 0) {
+          if (findCard(uid))
+            accessGranted();
+          else
+            accessDenied();
+        }
       }
-      if (cfg[1]) {                 //PASSWORD ENABLED
+      if (cfg[1]) {                                                    //PASSWORD ENABLED
+        if (Serial.available()) {
+          c = Serial.read();
+          if ((c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9' ) && password.length() < 9) {
+            password += c;
+            lcd.print("X");
+          }
+          else if (c == 'C') {
+            password = password.substring(password.length() - 1);
+            lcd.setCursor(0, 1);
+            lcd.print("                        ");
 
+            for (int i = 0; i < password.length(); i++)
+              lcd.print('X');
+          } else if (c == 'O') {
+            if (checkPass(password))
+              accessGranted();
+            else
+              accessDenied();
+          }
+        }
       }
     }
   }
