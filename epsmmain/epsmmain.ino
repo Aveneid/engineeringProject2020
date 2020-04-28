@@ -33,6 +33,7 @@
 
 #define OUT D5
 #define CARDSIZE 4
+#define LOCKTIME 1000*60*5
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);          //create object for LCD class
 //ESP8266WebServer server(80);            //enable server on port 80
@@ -47,6 +48,8 @@ bool MasterAccess = false;              //master access flag
 uint8_t MasterID[4];                //master card ID - to prevent future reads from eeprom to save some time and power
 unsigned long t1;                 //counter for wifi
 unsigned long t2;                 //counter for card scanner
+unsigned long retryTimer;
+uint8_t tries = 0;
 uint8_t uid[4], uidLen;               //card data
 
 
@@ -119,20 +122,17 @@ void clearData() {                    //perform EEPROM clear and fill with defau
     EEPROM.put(i, 0);                 //clear whole EEPROM
 
   EEPROM.put(0, 1);                   //first config flag
-
   EEPROM.put(1, 'a'); EEPROM.put(2, 'd'); EEPROM.put(3, 'm'); EEPROM.put(4, 'i'); EEPROM.put(5, 'n'); EEPROM.put(6, '\0'); //default admin password for web server
-
   EEPROM.put(9, 1);                 //enable nfc
   EEPROM.put(10, 1);                //enable password
-
   lcd.print("RESETTING...");
   EEPROM.commit();                  //write changes to EEPROM
   delay(1000);
   lcd.clear();
 }
 
-void accessGranted(){}
-void accessDenied(){}
+void accessGranted(){lcd.clear();lcd.print("ACCESS GRANTED"); digitalWrite(OUT,HIGH); delay(5000); digitalWrite(OUT,LOW); tries=0;}
+void accessDenied(){lcd.clear();lcd.print("ACCESS DENIED"); delay(5000);tries++; }
 
 void setup() {
 
@@ -219,6 +219,9 @@ void firstRunConfig() {
 //WiFiClient client;
 
 void loop() {
+  if(tries <3){
+
+  
   if (millis() - t1 >= 1000) {
 //    client = server.available();                  //check for new request on port 80
     t1 = millis();
@@ -275,6 +278,11 @@ void loop() {
   if (cfg[1]) {                 //PASSWORD ENABLED
 
     }
+  }}
+  else {
+    if(
+    lcd.clear();
+    lcd.print("LOCKED");
+    
   }
 }
- 
