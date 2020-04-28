@@ -201,38 +201,6 @@ void accessDenied() {
   delay(5000);
 }
 
-
-
-/* 
-*		main setup function
-*/
-void setup() {
-  Serial.begin(9600);                 //serial for keyboard
-  EEPROM.begin(512);                  //eeprom for config and data
-
-  lcd.init();
-  lcd.backlight();
-
-  nfc.begin();
-  nfc.SAMConfig();
-
-  pinMode(D4, INPUT);
-  pinMode(OUT, OUTPUT);
-
-
-  server.on("/",index);
-
-
-  if (!digitalRead(D4))
-    clearData();
-
-  if (EEPROM.read(FIRSTRUN) == 1) {
-    firstRunConfig();
-  }
-
-  t1 = millis();
-  t2 = millis();
-}
 /*
 *		function that provides `first run config` for owner / administrator
 */
@@ -267,7 +235,7 @@ void firstRunConfig() {
         lcd.print(c);
 
       } else if (c == 'C') {
-        password = password.substring(password.length() - 1);
+        password = password.substring(0,password.length() - 1);
         lcd.setCursor(0, 1);
         lcd.print("                        ");
 
@@ -290,6 +258,184 @@ void firstRunConfig() {
   EEPROM.commit();
 }
 
+/*
+*
+*		WEB SERVER STUFF
+*
+*/
+
+bool auth(){
+	if(server.hasHeader("Cookie") && server.header("Cookie").indexOf("SESSID=1") != -1) return true;
+	return false;
+}
+
+void handleNotFound(){
+	
+	String msg = "Not found\n\n";
+	msg += server.uri;	
+	server.send(404,"text/plain",msg);
+}
+
+
+const char indexHTML[] PROGMEM = R"rawliteral(<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SmartLock - System zarządzania</title><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script><script type="text/javascript">function cD(id){if(confirm("Usunąć karte o ID: " + id + "?"))window.location = "delete?ID=" + id;} function toggleNFC(){window.location ="toggleNFC";} function togglePIN(){window.location = "togglePIN";} </script></head><body><div class="container-fluid"><div class="row"><div class="col-md-12"><div class="page-header"><h1>SmartLock <small>System zarządzania</small></h1></div><dl><dt>Panel administracyjny</dt><dd>W tym panelu możesz zarządzać zamkiem, sprawdzić rozpoznawane karty oraz ilość dostępnego miejsca dla nich. <br \>Możesz również zmienić ustawienia dostępu do zamka, zmienić PIN, włączyć / wyłączyć możliwość odczytu kart czy dostępu kodem PIN.</dd></dl><div class="row"><div class="col-md-7"><h3>Rozpoznawane karty:</h3><table class="table table-sm"><thead><tr><th>#</th><th>Identyfikator</th><th>Akcja</th></tr></thead><tbody>)rawliteral";
+const char indexHTML2[] PROGMEM = R"rawliteral(</tbody></table> </div><div class="col-md-5"><h3>Dostępna pamięć kart:</h3><div class="progress"><div class="progress-bar" style="width: )rawliteral";
+const char indexHTML3[] PROGMEM = R"rawliteral("% !important"></div><label>)rawliteral";
+const char indexHTML4[] PROGMEM = R"rawliteral("%</label><form role="form" action="changePass"><div class="form-group"> <h4> Zmiana hasła</h4><label for="exampleInputPassword1">Nowe hasło</label><input type="password" class="form-control" id="exampleInputPassword1" name="PASS"/></div><button type="submit" class="btn btn-primary">Zmień</button></form><br /><div class="checkbox"><label>)rawliteral";
+const char indexHTML5[] PROGMEM = R"rawliteral("</div></div></div></div></div></body></html>)rawliteral";
+
+
+
+void index(){
+	String header;
+	if(!auth()){
+		header = "HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n";
+		server.sendContent(header);
+		return;
+	}
+	int cardsCount = EEPROM.read(USERCARDSCOUNT);
+	header = indexHTML;
+	for(int i=0;i<cardsCount;i++){
+		String data = String(EEPROM.read(USERCARDS + i * CARDSIZE)) + String(EEPROM.read(USERCARDS + i * CARDSIZE+1)) + String(EEPROM.read(USERCARDS + i * CARDSIZE+2)) + String(EEPROM.read(USERCARDS + i * CARDSIZE+3));
+		header += "<tr class='table-active'><td>"+ String(i) + "</td><td>"+data+"</td><td><button type='button' onClick='cD("+data+")' class='btn btn-sm btn-danger'>Usuń</button></td></tr>";
+	}
+	header += indexHTML2 + String((int)cardsCount / 120) + indexHTML3 + String((int)cardsCount / 120) + indexHTML4;
+	header += "<input onClick='toggleNFC()' type='checkbox'"; if(cfg[0]) header += "checked"; header += "/> Włącz obsługę kart</label></div>";
+	header += "<input onClick='togglePIN()' type='checkbox'"; if(cfg[1]) header += "checked"; header += "/> Włącz obsługę kodu PIN</label></div> ";
+	header += indexHTML5;
+
+	server.send(200,"text/html",header);
+}
+
+
+void del(){
+	if(server.hasArg("ID")){
+		if(server.arg("ID").length == 8){
+			int cardsCount = EEPROM.read(USERCARDSCOUNT);
+			uint8_t cards[cardsCount][4];
+			
+			for(int i=0;i<cardsCount;i++)
+				for(jnt j=0;j<4;j++)
+					cards[i][j] = EEPROM.read(USERCARDS + i * CARDSIZE + j);
+		
+			uint8_t card[4];
+			for(int i=0;i<4;i++)
+				card[i] = (uint8_t)atoi(server.arg("ID").substring(0,2));    //converting url parameter to int array (card data)
+				
+			
+			for(int i=0;i<cardsCount;i++)
+				if(arrcmp(cards[i],card)){
+					for(int a =0;a<4;i++)
+						cards[i][a] = cards[cardsCount][a];
+					
+					for(int i=0;i<cardsCount--;i++)
+						EEPROM.put(USERCARDS + i * CARDSIZE + j, cards[i][j]);
+					
+					EEPROM.put(USERCARDSCOUNT,cardsCount--);
+
+					break;
+				}
+			
+			
+			EEPROM.commit();
+		}
+	}
+}
+
+void login(){
+	server.send(200,"text/html","<html><body><form action='/login'>Password: <input type='password' name='PASS'><input type='submit'></form></body></html>");		
+	String hd="";
+	if(server.hasArg("LOGOUT")){ hd = "HTTP/1.1 301 OK\r\nSet-Cookie: SESSID=0\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n"; server.sendContent(hd);}
+	if(server.hasArg("PASS")){
+		String pass;
+		for (int i = 0; i < 8; i++) {
+			char c = EEPROM.read(ADMINPASS + i);
+			if (c != '\0')
+				pass += c;
+		}
+		
+		if(server.arg("PASS") == pass){
+			hd = "HTTP/1.1 301 OK\r\nSet-Cookie: SESSID=1\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n";
+			server.sendContent(hd);
+			return;
+		}
+		hd = "Wrong password :v";
+	}
+	String msg = "<html><body><center><b>"+hd+"</b></center></body></html>";
+	server.send(200,"text/html",msg);
+}
+
+void toggleNFC(){
+	cfg[0] = !cfg[0];
+	if(cfg[0])
+		EEPROM.put(NFCENABLED,1);
+	else
+		EEPROM.put(NFCENABLED,0);
+	server.sendContent("HTTP/1.1 301 OK\r\nSet-Cookie: SESSID=0\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
+	EEPROM.commit();
+}
+
+
+void togglePIN(){
+	cfg[1] = !cfg[1];
+		if(cfg[1])
+		EEPROM.put(PASSENABLED,1);
+	else
+		EEPROM.put(PASSENABLED,0);
+	server.sendContent("HTTP/1.1 301 OK\r\nSet-Cookie: SESSID=0\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
+	EEPROM.commit();
+}
+
+
+
+
+/* 
+*		main setup function
+*/
+void setup() {
+  Serial.begin(9600);                 //serial for keyboard
+  EEPROM.begin(512);                  //eeprom for config and data
+
+  lcd.init();
+  lcd.backlight();
+
+  nfc.begin();
+  nfc.SAMConfig();
+
+  pinMode(D4, INPUT);
+  pinMode(OUT, OUTPUT);
+
+
+  server.on("/",index);
+  server.on("/login",login);
+  server.on("/delete",del);
+  server.on("/changePass",changePass);
+  server.on("/togglePIN",togglePIN);
+  server.on("/toggleNFC",toggleNFC);
+  server.onNotFound(handleNotFound);
+  
+      const char * headerkeys[] = {
+        "Cookie"
+    };
+	
+	
+	size_t headerkeyssize = sizeof(headerkeys) / sizeof(char * );
+	server.collectHeaders(headerkeys, headerkeyssize);
+    server.begin();
+
+  if (!digitalRead(D4))
+    clearData();
+
+  if (EEPROM.read(FIRSTRUN) == 1) {
+    firstRunConfig();
+  }
+  
+  cfg[0] = EEPROM.read(NFCENABLED);
+  cfg[1] = EEPROM.read(PASSENABLED);
+
+  t1 = millis();
+  t2 = millis();
+}
+
 
 
 
@@ -298,25 +444,9 @@ void firstRunConfig() {
 *		provides control for RFID reader, password entry, admin access and others
 */
 void loop() {
-	/*
-	
-	WEB SERVER HANDLING HERE
-	
-	
-	*/
-	
 
-	
-	
-	
-	
-	
-	
-	/*
-	
-	MAIN DEVICE HANDLING HERE
-	
-	*/
+	server.handleClient();
+
   if (tries < 3) {                                                    
     if (millis() - t1 >= 1000) {
       //    client = server.available();                                                  //check for new request on port 80
@@ -346,13 +476,14 @@ void loop() {
       lcd.print("add or delete");
 
       if (!arrcmp(MasterID, uid)) {
-        if (addDeleteCard(uid)) {        								//card deleted
-          lcd.clear();
-          lcd.print("Card deleted");
-        } else {                                                        //card added
-          lcd.clear();
-          lcd.print("Card added");
-        }
+		  if(EEPROM.read(USERCARDSCOUNT)<120)
+			if (addDeleteCard(uid)) {        								//card deleted
+			lcd.clear();
+			lcd.print("Card deleted");
+			} else {                                                        //card added
+			lcd.clear();
+			lcd.print("Card added");
+			}
         delay(500);
       } else {                                                        	 //master card scanned - exit from masterMode
         lcd.clear();
@@ -380,7 +511,7 @@ void loop() {
             lcd.print("X");
           }
           else if (c == 'C') {
-            password = password.substring(password.length() - 1);
+            password = password.substring(0,password.length() - 1);
             lcd.setCursor(0, 1);
             lcd.print("                        ");
 
