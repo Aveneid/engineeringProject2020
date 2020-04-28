@@ -36,7 +36,7 @@
 #define LOCKTIME 1000*60*5
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);  //create object for LCD class
-//ESP8266WebServer server(80);       //enable server on port 80
+ESP8266WebServer server(80);       //enable server on port 80
 
 Adafruit_PN532 nfc(D8, D7);          //rq rst
 
@@ -49,7 +49,7 @@ unsigned long t1;                    //counter for wifi
 unsigned long t2;                    //counter for card scanner
 unsigned long retryTimer;
 int retryTimerSeconds = 0;
-uint8_t tries = 0;
+uint8_t tries = 0;                   //counter for invalid card / passwords
 uint8_t uid[4], uidLen;              //card data
 String password = "";                //password holder
 char c;                              //incoming character holder
@@ -219,6 +219,10 @@ void setup() {
   pinMode(D4, INPUT);
   pinMode(OUT, OUTPUT);
 
+
+  server.on("/",index);
+
+
   if (!digitalRead(D4))
     clearData();
 
@@ -286,7 +290,7 @@ void firstRunConfig() {
   EEPROM.commit();
 }
 
-//WiFiClient client;
+
 
 
 /*
@@ -300,6 +304,9 @@ void loop() {
 	
 	
 	*/
+	
+
+	
 	
 	
 	
