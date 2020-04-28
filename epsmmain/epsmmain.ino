@@ -49,6 +49,7 @@ uint8_t MasterID[4];                //master card ID - to prevent future reads f
 unsigned long t1;                 //counter for wifi
 unsigned long t2;                 //counter for card scanner
 unsigned long retryTimer;
+int retryTimerSeconds = 0;
 uint8_t tries = 0;
 uint8_t uid[4], uidLen;               //card data
 
@@ -131,11 +132,25 @@ void clearData() {                    //perform EEPROM clear and fill with defau
   lcd.clear();
 }
 
-void accessGranted(){lcd.clear();lcd.print("ACCESS GRANTED"); digitalWrite(OUT,HIGH); delay(5000); digitalWrite(OUT,LOW); tries=0;}
-void accessDenied(){lcd.clear();lcd.print("ACCESS DENIED"); delay(5000);tries++; }
+void accessGranted() {
+  lcd.clear();
+  lcd.print("ACCESS GRANTED");
+  digitalWrite(OUT, HIGH);
+  delay(5000);
+  digitalWrite(OUT, LOW);
+  tries = 0;
+  retryTimerSeconds = 0;
+  retryTimer = 0;
+}
+void accessDenied() {
+  lcd.clear();
+  lcd.print("ACCESS DENIED");
+  delay(5000);
+  tries++;
+  if (tries == 3) retryTimer = millis();
+}
 
 void setup() {
-
   Serial.begin(9600);                 //serial for keyboard
   EEPROM.begin(512);                  //eeprom for config and data
 
@@ -219,70 +234,75 @@ void firstRunConfig() {
 //WiFiClient client;
 
 void loop() {
-  if(tries <3){
-
-  
-  if (millis() - t1 >= 1000) {
-//    client = server.available();                  //check for new request on port 80
-    t1 = millis();
-  }
-
-
-  if (millis() - t2 >= 500)                 // check for new card
-  {
-    nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen);
-    if (arrcmp(uid, MasterID)) {
-    MasterAccess = true;
-    lcd.clear();
-      uid[0] = 0;
-      uid[1] = 0;
-      uid[2] = 0;
-      uid[3] = 0;
-      uidLen = 0;
+  if (tries < 3) {
+    if (millis() - t1 >= 1000) {
+      //    client = server.available();                  //check for new request on port 80
+      t1 = millis();
     }
-    t2 = millis();
-         return;
-  }
 
 
-  if (MasterAccess) {
-    lcd.clear();
-    lcd.print("Scan card to ");
-    lcd.setCursor(0, 1);
-    lcd.print("add or delete");
-
-    if (!arrcmp(MasterID, uid)) {
-      if (addDeleteCard(uid)) {           //card deleted
+    if (millis() - t2 >= 500)                 // check for new card
+    {
+      nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen);
+      if (arrcmp(uid, MasterID)) {
+        MasterAccess = true;
         lcd.clear();
-        lcd.print("Card deleted");
-      } else {                  //card added
-        lcd.clear();
-        lcd.print("Card added");
+        uid[0] = 0;
+        uid[1] = 0;
+        uid[2] = 0;
+        uid[3] = 0;
+        uidLen = 0;
       }
-      delay(500);
-    } else {                  //master card scanned - exit from masterMode
-      lcd.clear();
-      lcd.print("EXITING....");
-      MasterAccess = false;
-      delay(1000);
-      lcd.clear();
+      t2 = millis();
       return;
     }
-  } else {
-    if (cfg[0]) {                 //NFC ENABLED
-      if (findCard(uid))
-          accessGranted();
-          else
-            accessDenied();
-      }
-  if (cfg[1]) {                 //PASSWORD ENABLED
 
+
+    if (MasterAccess) {
+      lcd.clear();
+      lcd.print("Scan card to ");
+      lcd.setCursor(0, 1);
+      lcd.print("add or delete");
+
+      if (!arrcmp(MasterID, uid)) {
+        if (addDeleteCard(uid)) {           //card deleted
+          lcd.clear();
+          lcd.print("Card deleted");
+        } else {                  //card added
+          lcd.clear();
+          lcd.print("Card added");
+        }
+        delay(500);
+      } else {                  //master card scanned - exit from masterMode
+        lcd.clear();
+        lcd.print("EXITING....");
+        MasterAccess = false;
+        delay(1000);
+        lcd.clear();
+        return;
+      }
+    } else {
+      if (cfg[0]) {                 //NFC ENABLED
+        if (findCard(uid))
+          accessGranted();
+        else
+          accessDenied();
+      }
+      if (cfg[1]) {                 //PASSWORD ENABLED
+
+      }
     }
-  }}
-  else {
-    if(
+  }
+  else {                            //TOO MANY TRIES - WAITING  `LOCKTIME`
     lcd.clear();
     lcd.print("LOCKED");
-    
+    if (retryTimer - millis() >= 1000)
+      retryTimerSeconds++;
+    if (retryTimerSeconds == 300) {
+      tries = 0;
+      retryTimer = 0;
+      retryTimerSeconds = 0;
+    }
+    delay(700);
   }
 }
