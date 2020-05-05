@@ -18,7 +18,7 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 bool light = true;
 
 void setup(){
-  Serial.begin(9600);
+  Serial.begin(74880);
   pinMode(12,OUTPUT);
   digitalWrite(12,light);
 }
