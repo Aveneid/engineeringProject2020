@@ -1,8 +1,6 @@
 #include <Keypad.h>
-
 #define ROWS 4 
-#define COLS  6 
-
+#define COLS 6 
 
 char keys[ROWS][COLS] = {
   {'!','7','8','9','&','C'},
@@ -13,23 +11,15 @@ char keys[ROWS][COLS] = {
 byte rowPins[ROWS] = {5, 4, 3, 2};
 byte colPins[COLS] = {11,10,9, 8, 7, 6}; 
 
-
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS); 
-bool light = true;
 
 void setup(){
   Serial.begin(74880);
-  pinMode(12,OUTPUT);
-  digitalWrite(12,light);
 }
-  
 void loop(){
   char key = keypad.getKey();
-  if(key != NO_KEY)
-  if(key == '&'){
-  light = !light;
-  digitalWrite(12,light);
-  }else{
+  if(key != NO_KEY){
     Serial.print(key);
+  delay(100);
   }
 }
