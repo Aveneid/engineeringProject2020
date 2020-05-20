@@ -26,8 +26,9 @@ Compile files using for example Arduino IDE and upload to your device. There's a
 
 ### Wiring diagram
 Feel free to not stick hardly to this schema, this is an example wiring that is used in this project. You can always change pin configuration.
-<details><summary>CLICK ME</summary>
- ![Wiring diagram](https://github.com/Aveneid/engineeringProject2020/blob/master/wiring_diagram.png?raw=true)
+<details>
+<summary>CLICK ME</summary>
+![Wiring diagram](https://github.com/Aveneid/engineeringProject2020/blob/master/wiring_diagram.png?raw=true)
 </details>
 ## Usage
 
