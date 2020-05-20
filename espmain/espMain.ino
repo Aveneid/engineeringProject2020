@@ -790,7 +790,6 @@ void loop() {
           }
           else
             barcode += bc;
-          // Serial.flush();
         }
       }
     }
