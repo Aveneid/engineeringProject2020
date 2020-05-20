@@ -17,6 +17,15 @@ Poziom blokad i zabezpieczeń oraz postęp w ich wyłączaniu powinien być sygn
 możliwość uzbrajania poprzez sygnał WiFi np. aplikacja mobilna (smartfon).
 Do obsługi czujników i transmisji można wykorzystać dostępne biblioteki programistyczne.
 
+
+## Instalation
+In `espmain/espMain.cpp` in line [726](https://github.com/Aveneid/engineeringProject2020/blob/master/espmain/espMain.cpp#L726) change `TEST` and `TEST1234` to your Wi-Fi BSSID and password.
+Compile file using for example Arduino IDE and upload to your device. There's also precopiled binary available.
+
+
+### Wiring diagram
+
+
 ## Usage
 
 When device is powered for fisrt time, it will have to be configured using simple wizard.
