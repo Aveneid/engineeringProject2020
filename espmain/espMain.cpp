@@ -1,3 +1,16 @@
+/** 
+ *  @file   espMain.cpp 
+ *  @brief  Main NodeMcu file \n
+ *  Takes care of validating data entered by user \n
+ *  Stores cards data and passwords \n
+ *  Serves administrator panel via http over Wi-Fi \n
+ *  
+ *  @author Bartlomiej Ferenc, Tomasz Kaczmarczyk
+ *  @date   2020-03-31
+ *  Copyright (c) 2020 Bartlomiej Ferenc (github.com/Aveneid) & Tomasz Kaczmarczyk (github.com/Egeneza151)
+ ***********************************************/
+
+
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 #include <Adafruit_PN532.h>

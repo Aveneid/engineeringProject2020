@@ -1,3 +1,15 @@
+/** 
+ *  @file   keyboard_listener.cpp 
+ *  @brief  Main Arduino Nano file \n
+ *  Reads keypad inputs, reads barcode scanner inputs \n
+ *  sends those inputs via Serial ports to NodeMcu.
+ *  @author Bartłomiej Ferenc, Tomasz Kaczmarczyk
+ *  @date   2020-03-31
+ *  Copyright (c) 2020 Bartlomiej Ferenc (github.com/Aveneid) & Tomasz Kaczmarczyk (github.com/Egeneza151)
+ ***********************************************/
+
+
+
 #include <SoftwareSerial.h>
 #include <PS2Keyboard.h>
 #include <Keypad.h>

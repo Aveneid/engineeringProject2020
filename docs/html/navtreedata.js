@@ -24,8 +24,25 @@
 */
 var NAVTREE =
 [
-  [ "EngineeringProject2020", "index.html", [
-    [ "engineeringProject2020", "md__r_e_a_d_m_e.html", null ],
+  [ "Electronic lock with multilevel access control", "index.html", [
+    [ "Electronic lock with multilevel access control", "md__r_e_a_d_m_e.html", [
+      [ "Instalation", "md__r_e_a_d_m_e.html#autotoc_md1", [
+        [ "Wiring diagram", "md__r_e_a_d_m_e.html#autotoc_md2", null ]
+      ] ],
+      [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md3", null ],
+      [ "What's inside?", "md__r_e_a_d_m_e.html#autotoc_md7", [
+        [ "Hardware used", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
+        [ "Libraries used", "md__r_e_a_d_m_e.html#autotoc_md9", [
+          [ "Adding or deleting cards", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
+          [ "Changing settings", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
+          [ "Resetting to default", "md__r_e_a_d_m_e.html#autotoc_md6", [
+            [ "espmain.ino", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+            [ "keyboard_listener.ino", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
+          ] ]
+        ] ]
+      ] ],
+      [ "License", "md__r_e_a_d_m_e.html#autotoc_md12", null ]
+    ] ],
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [

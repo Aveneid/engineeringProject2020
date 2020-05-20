@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.18"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>EngineeringProject2020: keyboard_listener/keyboard_listener.cpp File Reference</title>
+<title>Electronic lock with multilevel access control: keyboard_listener/keyboard_listener.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">EngineeringProject2020
+   <div id="projectname">Electronic lock with multilevel access control
    </div>
   </td>
  </tr>
@@ -90,6 +90,11 @@ $(document).ready(function(){initNavTree('keyboard__listener_8cpp.html',''); ini
 <div class="title">keyboard_listener.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Main Arduino Nano file <br  />
+Reads keypad inputs, reads barcode scanner inputs <br  />
+sends those inputs via Serial ports to NodeMcu.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;SoftwareSerial.h&gt;</code><br />
 <code>#include &lt;PS2Keyboard.h&gt;</code><br />
 <code>#include &lt;Keypad.h&gt;</code><br />
@@ -136,7 +141,15 @@ Variables</h2></td></tr>
 <tr class="memdesc:a60449ab6e3cc483a69bbe369ea9f5aa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Counter for ":".  <a href="keyboard__listener_8cpp.html#a60449ab6e3cc483a69bbe369ea9f5aa7">More...</a><br /></td></tr>
 <tr class="separator:a60449ab6e3cc483a69bbe369ea9f5aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Macro Definition Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Main Arduino Nano file <br  />
+Reads keypad inputs, reads barcode scanner inputs <br  />
+sends those inputs via Serial ports to NodeMcu. </p>
+<dl class="section author"><dt>Author</dt><dd>Bartłomiej Ferenc, Tomasz Kaczmarczyk </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>2020-03-31 Copyright (c) 2020 Bartlomiej Ferenc (github.com/Aveneid) &amp; Tomasz Kaczmarczyk (github.com/Egeneza151) </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+</div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="ab59ad2ee1a48b83c2eef1f019ed8cc48"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab59ad2ee1a48b83c2eef1f019ed8cc48">&#9670;&nbsp;</a></span>COLS</h2>
 
@@ -151,7 +164,7 @@ Variables</h2></td></tr>
 
 <p>Number of columns in keypad. </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00008">8</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00020">20</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -169,7 +182,7 @@ Variables</h2></td></tr>
 
 <p>Number of rows in keypad. </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00006">6</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00018">18</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -223,7 +236,7 @@ Variables</h2></td></tr>
 <p>get key from Keypad</p>
 <p>wait some time</p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00038">38</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00050">50</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -245,7 +258,7 @@ Variables</h2></td></tr>
 <p>start Serial for barcode scanner</p>
 <p>start PS2keyboard for barcode scanner</p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00028">28</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00040">40</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -264,7 +277,7 @@ Variables</h2></td></tr>
 
 <p>Counter for ":". </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00037">37</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00049">49</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -282,7 +295,7 @@ Variables</h2></td></tr>
 
 <p>Pin map for columns for keypad. </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00018">18</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00030">30</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -300,7 +313,7 @@ Variables</h2></td></tr>
 
 <p>Create instance of PS2Keyboard class. </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00026">26</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00038">38</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -318,7 +331,7 @@ Variables</h2></td></tr>
 
 <p>Create keypad instance. </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00021">21</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00033">33</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -342,7 +355,7 @@ Variables</h2></td></tr>
 </div><!-- fragment -->
 <p>Keypad layout. </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00009">9</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00021">21</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
@@ -360,7 +373,7 @@ Variables</h2></td></tr>
 
 <p>Pin map for rows for keypad. </p>
 
-<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00016">16</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="keyboard__listener_8cpp_source.html#l00028">28</a> of file <a class="el" href="keyboard__listener_8cpp_source.html">keyboard_listener.cpp</a>.</p>
 
 </div>
 </div>
