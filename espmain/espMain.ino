@@ -40,12 +40,14 @@
 
 #define OUT D5
 #define CARDSIZE 4
-
-LiquidCrystal_I2C lcd(0x27, 16, 2);  //create object for LCD class
-ESP8266WebServer server(80);       //enable server on port 80
-SoftwareSerial bs(D7, 50); // RX, TX
-
-Adafruit_PN532 nfc(D8, D6);          //rq rst
+//create object for LCD class
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+//enable server on port 80
+ESP8266WebServer server(80);
+// RX, TX
+SoftwareSerial bs(D7, 50);
+//rq rst
+Adafruit_PN532 nfc(D8, D6);
 
 
 
@@ -53,34 +55,41 @@ Adafruit_PN532 nfc(D8, D6);          //rq rst
 //MAIN VARIABLES
 uint8_t tries = 0;
 int locktime = 5;
-bool cfg[3];                         // disable pin, disable nfc, disable scanner
-bool MasterAccess = false;           //master access flag
-uint8_t MasterID[4];                 //master card ID - to prevent future reads from eeprom to save some time and power
-unsigned long t2;                    //counter for card scanner
+// disable pin, disable nfc, disable scanner
+bool cfg[3];
+//master access flag
+bool MasterAccess = false;
+//master card ID - to prevent future reads from eeprom to save some time and power
+uint8_t MasterID[4];
+//counter for card scanner
+unsigned long t2;
+
 unsigned long retryTimer;
 unsigned long curMilis;
 int retryTimerSeconds = 0;
-//counter for invalid card / passwords
-uint8_t uid[4], uidLen;              //card data
-String password = "";                //password holder
-char c;                              //incoming character holder
+//card data
+uint8_t uid[4], uidLen;
+//password holder
+String password = "";
+//incoming character holder
+char c;
 String barcode = "";
 
 
-/*
+/**
     switches display background for short period of time
-*/
+**/
 void blk() {
   lcd.noBacklight();
   delay(100);
   lcd.backlight();
   delay(100);
 }
-/*
+/**
   compare two arrays - type uint8_t - check cards ids
   returns: 1 if arrays are the same
        0 if not
-*/
+**/
 bool arrcmp(uint8_t a[4], uint8_t b[4]) {
   for (int i = 0; i < 4; i++)
     if (a[i] != b[i])
@@ -104,9 +113,9 @@ String getValue(String data, char separator, int index)
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-/*
+/**
     performs EEPROM clear and fill with default values
-*/
+**/
 void clearData() {
   lcd.clear();
   for (int i = 0; i < EEPROM.length(); i++)
@@ -123,11 +132,11 @@ void clearData() {
   delay(1000);
   lcd.clear();
 }
-/*
+/**
   tries to find scanned card in memory
   returns: 1 if card found and deleted
        0 if card not found and added
-*/
+**/
 bool addDeleteCard(uint8_t a[4]) {
 
   uint8_t cardsCount = EEPROM.read(USERCARDSCOUNT);
@@ -170,10 +179,10 @@ bool addDeleteCard(uint8_t a[4]) {
   return false;
 }
 
-/*  checks if scanned card is known
+/**  checks if scanned card is known
   returns: 1 if yes
        0 if not
-*/
+**/
 bool findCard(uint8_t a[4]) {
 
   uidLen = 0;
@@ -191,11 +200,11 @@ bool findCard(uint8_t a[4]) {
   return false;
 
 }
-/*
+/**
     checks if given given password is correct
     returns: 1 if yes
          0 if no
-*/
+**/
 bool checkPass(String pass) {
   String mainPass;
   for (int i = 0; i < 8; i++) {
@@ -212,9 +221,9 @@ bool checkPass(String pass) {
   return false;
 }
 
-/*
+/**
     main function that grants access
-*/
+**/
 void accessGranted() {
   lcd.clear();
   lcd.print("ACCESS GRANTED");
@@ -232,9 +241,9 @@ void accessGranted() {
   lcd.setCursor(0, 1);
 
 }
-/*
+/**
     main function that refuses access
-*/
+**/
 void accessDenied() {
   lcd.clear();
   lcd.print("ACCESS DENIED");
@@ -256,9 +265,9 @@ void accessDenied() {
   lcd.print("ENTER PASS:");
   lcd.setCursor(0, 1);
 }
-/*
+/**
     function that provides `first run config` for owner / administrator
-*/
+**/
 
 void firstRunConfig() {
 
@@ -272,10 +281,13 @@ void firstRunConfig() {
   lcd.print("Master ID:");
   lcd.setCursor(0, 1);
 
-  for (int i = 0; i < 4; i++) {       //print master card ID
+  //print master card ID
+  for (int i = 0; i < 4; i++) {
     lcd.print(uid[i]);
-    EEPROM.put(MASTERCARDID + i, uid[i]); //put master id to EEPROM
-    MasterID[i] = uid[i];         //and to var in ram
+    //put master id to EEPROM
+    EEPROM.put(MASTERCARDID + i, uid[i]);
+    //and to var in ram
+    MasterID[i] = uid[i];
   }
 
   delay(3000); blk(); lcd.clear();
@@ -296,9 +308,9 @@ void firstRunConfig() {
         lcd.setCursor(0, 1);
         lcd.print("                        ");
         lcd.setCursor(0, 1);
-        // for (int i = 0; i < password.length(); i++)
+
         lcd.print(password);
-        //lcd.print("X");
+
 
       } else if (c == 'O') {
         lcd.clear();
@@ -317,11 +329,11 @@ void firstRunConfig() {
   delay(1000);
   lcd.clear();
 }
-/*
+/**
 
     WEB SERVER STUFF
 
-*/
+**/
 bool auth() {
 
   if (server.hasHeader("Cookie")) {
@@ -336,7 +348,6 @@ bool auth() {
 void handleNotFound() {
 
   String msg = "Not found\n\n";
-  //  msg += server.uri;
   server.send(404, "text/plain", msg);
 }
 
@@ -350,7 +361,6 @@ void changePass() {
     if (p.length() > 0 && p.length() < 9) {
       int pl = p.length();
       for (int i = 0; i < pl; i++) {
-        //Serial.println(p.substring(0, 1));
         EEPROM.put(ADMINPASS + i, p.charAt(i));
 
       }
@@ -384,22 +394,15 @@ void changeLockTime() {
   }
   if (server.hasArg("LOCKTIME")) {
     String p = server.arg("LOCKTIME");
-    // Serial.println(p);
-    // Serial.println(p.length());
     if (p.length() > 0 && p.length() < 4) {
       for (int i = 0; i < p.length(); i++)
         if (!('0' <= p.charAt(i) && (int)p.charAt(i) <= '9')) {
-          //  Serial.println(p.charAt(i));
           server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
           return;
         }
-      // Serial.println(p);
       char buf[p.length()];
       for (int i = 0; i < p.length(); i++) buf[i] = p.charAt(i);
-      //for (int i = 0;i < p.length(); i++)
-      //  Serial.println(buf[i]);
       uint8_t lock = atoi(buf);
-      // Serial.println(lock);
       EEPROM.put(LOCKTIME, lock);
       EEPROM.commit();
       locktime = lock;
@@ -448,7 +451,6 @@ void dumpCards() {
 void del() {
   if (auth()) {
     if (server.hasArg("ID")) {
-      // if (String(server.arg("ID")).length() == 8) {
       int cardsCount = EEPROM.read(USERCARDSCOUNT);
       uint8_t cards[cardsCount][4];
 
@@ -477,7 +479,6 @@ void del() {
             cardsCount -= 1;
 
           }
-          //Serial.print("\r\nbefore commit\r\n");
           dumpCards();
           for (int j = 0; j < cardsCount; j++)
             for (int k = 0; k < 4; k++)
@@ -491,7 +492,6 @@ void del() {
 
       EEPROM.commit();
     }
-    //Serial.print("\r\nafter commit\r\n");
     dumpCards();
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
   }
@@ -499,8 +499,6 @@ void del() {
 void login() {
   String hd = "";
   if (server.hasArg("LOGOUT")) {
-    //hd = "HTTP/1.1 301 OK\r\nSet-Cookie: ESPSESSIONID=0\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n";
-    //server.sendContent(hd);
     server.sendHeader("Location", "/login");
     server.sendHeader("Cache-Control", "no-cache");
     server.sendHeader("Set-Cookie", "ESPSESSIONID=0");
@@ -516,7 +514,6 @@ void login() {
     }
     pass = String(pass);
     if (server.arg("PASS") == pass) {
-      //hd = "HTTP/1.1 301 OK\r\nSet-Cookie: ESPSESSIONID=1\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n";
       server.sendHeader("Location", "/");
       server.sendHeader("Cache-Control", "no-cache");
       server.sendHeader("Set-Cookie", "ESPSESSIONID=1");
@@ -576,7 +573,6 @@ String h2i(String d) {
 
 
 void barcodeCheck(String code) {
-  //Serial.println("barcode check: " + code);
   if (code.length() > 0) {
     code = h2i(code);
 
@@ -604,17 +600,18 @@ void barcodeCheck(String code) {
 
 
 
-/*
+/**
     main setup function
-*/
+**/
 void setup() {
-  Serial.begin(74880);                 //serial for keyboard
-  EEPROM.begin(512);                  //eeprom for config and data
+  //serial for barcode scanner
+  Serial.begin(74880);
+  //eeprom for config and data
+  EEPROM.begin(512);
   delay(50);
-  //while (!Serial);
-
+  //serial for keyboard
   bs.begin(9600);
-  //while (!bs);
+
   lcd.init();
   lcd.backlight();
 
@@ -635,7 +632,8 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.hostname("smartlock");
   WiFi.begin("TEST", "TEST1234");
-  while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
+  // Wait for the Wi-Fi to connect
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
   } Serial.println("IP: " + WiFi.localIP());
   WiFi.softAPdisconnect (true);
@@ -643,7 +641,7 @@ void setup() {
 
   for (int l = 0; l < 4; l++)
     MasterID[l] = (uint8_t)EEPROM.read(MASTERCARDID + l);
-  // Serial.println(MasterID[l]);
+
 
   server.on("/", handleRoot);
   server.on("/login", login);
@@ -678,23 +676,20 @@ void setup() {
   lcd.clear();
   lcd.print("ENTER PASS:");
   lcd.setCursor(0, 1);
-  /* Serial.print("\r\n");
-    for (int i = 0; i < 30; i++) {
-     Serial.print(EEPROM.read(i));
-     Serial.print(" ");
-    }*/
+
   Serial.flush();
 }
-/*
+/**
     main loop function
     provides control for RFID reader, password entry, admin access and others
-*/
+**/
 void loop() {
 
   server.handleClient();
 
   if (tries < 3) {
-    if (millis() - t2 >= 500 && cfg[0])                                                             // check for new card
+    // check for new card
+    if (millis() - t2 >= 500 && cfg[0])
     {
       nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen, 100);
       if (uidLen != 0) {
@@ -728,14 +723,18 @@ void loop() {
       }
       t2 = millis();
     }
-    if (MasterAccess) {                         //MASTER HAS ACCESS
+    //MASTER HAS ACCESS
+    if (MasterAccess) {
       if (uidLen != 0) {
         if (!arrcmp(MasterID, uid)) {
           if (EEPROM.read(USERCARDSCOUNT) < 120) {
-            if (addDeleteCard(uid)) {                       //card deleted
+            if (addDeleteCard(uid)) {
+              //card deleted
               lcd.clear();
               lcd.print("Card deleted");
-            } else {                                                        //card added
+
+            } else {
+              //card added
               lcd.clear();
               lcd.print("Card added");
             }
@@ -747,10 +746,11 @@ void loop() {
             return;
           }
         }
-      }                                 //MASTER ACCESS ENDED
+      }
       return;
     } else {
-      if (cfg[0]) {                                                      //NFC ENABLED
+      //NFC ENABLED
+      if (cfg[0]) {
         if (uidLen != 0) {
           if (findCard(uid))
             accessGranted();
@@ -758,7 +758,8 @@ void loop() {
             accessDenied();
         }
       }
-      if (cfg[1]) {                                                       //PASSWORD ENABLED
+      //PASSWORD ENABLED
+      if (cfg[1]) {
         if (bs.available()) {
           c = bs.read();
           if ((c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9' ) && password.length() < 9) {
@@ -780,7 +781,8 @@ void loop() {
           }
         }
       }
-      if (cfg[2]) {                                                 //SCANNER ENABLED
+      //SCANNER ENABLED
+      if (cfg[2]) {
         if (Serial.available() > 0) {
           char bc = Serial.read();
           if (bc == '\r') {
@@ -792,22 +794,21 @@ void loop() {
         }
       }
     }
-  } else {                            //TOO MANY TRIES - WAITING  `LOCKTIME`
+  } else
+    //TOO MANY TRIES - WAITING  `LOCKTIME`
+  {
     curMilis = millis();
     if (curMilis - retryTimer  >= 1000) {
       retryTimerSeconds++;
       retryTimer = millis();
     }
-    //  Serial.println(locktime * 60);
     if (retryTimerSeconds >= locktime * 60) {
       tries = 0;
       retryTimer = 0;
       retryTimerSeconds = 0;
       lcd.clear(); lcd.print("ENTER PASS:");
     }
-    //delay(700);
   }
   uidLen = 0;
   uid[0] = 0; uid[1] = 0; uid[2] = 0; uid[3] = 0;
 }
-//#endif
