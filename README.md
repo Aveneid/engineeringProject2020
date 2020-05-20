@@ -5,7 +5,6 @@ Electronic lock with multilevel access control is a project made for course "Pro
 Main purpose for this project:
 - create project with engineering aspects, like tests and analisys before implemeting solution
 - learn how to create proper documentation for projects with LaTeX 
-- 
 
 
 Project desctiption: (PL)
