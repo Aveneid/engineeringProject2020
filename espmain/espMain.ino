@@ -31,11 +31,12 @@
 #define ADMINPASS 1
 #define NFCENABLED 9
 #define PASSENABLED 10
-#define PINCODE 11
-#define MASTERCARDID 19
-#define LOCKTIME 23
-#define USERCARDSCOUNT 24
-#define USERCARDS 25
+#define SCANNERENABLED 12
+#define PINCODE 12
+#define MASTERCARDID 20
+#define LOCKTIME 24
+#define USERCARDSCOUNT 25
+#define USERCARDS 26
 
 #define OUT D5
 #define CARDSIZE 4
@@ -52,7 +53,7 @@ Adafruit_PN532 nfc(D8, D6);          //rq rst
 //MAIN VARIABLES
 uint8_t tries = 0;
 int locktime = 5;
-bool cfg[2];                         // disable pin, disable nfc,
+bool cfg[3];                         // disable pin, disable nfc, disable scanner
 bool MasterAccess = false;           //master access flag
 uint8_t MasterID[4];                 //master card ID - to prevent future reads from eeprom to save some time and power
 unsigned long t2;                    //counter for card scanner
@@ -115,6 +116,7 @@ void clearData() {
   EEPROM.put(1, 'a'); EEPROM.put(2, 'd'); EEPROM.put(3, 'm'); EEPROM.put(4, 'i'); EEPROM.put(5, 'n'); EEPROM.put(6, '\0'); //default admin password for web server
   EEPROM.put(NFCENABLED, (uint8_t)1);
   EEPROM.put(PASSENABLED, (uint8_t)1);
+  EEPROM.put(SCANNERENABLED, (uint8_t)1);
   EEPROM.put(LOCKTIME, (uint8_t)5);
   lcd.print("RESETTING...");
   EEPROM.commit();
@@ -205,7 +207,6 @@ bool checkPass(String pass) {
     }
   }
   mainPass = String(mainPass);
-  Serial.println(mainPass);
   if (mainPass == pass)
     return true;
   return false;
@@ -241,7 +242,7 @@ void accessDenied() {
   barcode = "";
   retryTimerSeconds = 0;
   retryTimer = 0;
-Serial.flush();
+  Serial.flush();
   tries = tries + 1;
   uidLen = 0;
   if (tries == 3) {
@@ -428,6 +429,7 @@ void handleRoot() {
   server.sendContent(String(locktime)); server.sendContent(indexHTML5);
   h = "<input onClick='toggleNFC()' type='checkbox'"; if (cfg[0]) h += "checked"; h += "/> Włącz obsługę kart</label></div>";
   h += "<input onClick='togglePIN()' type='checkbox'"; if (cfg[1]) h += "checked"; h += "/> Włącz obsługę kodu PIN</label> ";
+  h += "<input onClick='toggleScanner()' type='checkbox'"; if (cfg[2]) h += "checked"; h += "/> Włącz obsługę skanera</label> ";
   server.sendContent(h);
   server.sendContent(indexHTML6);
   server.send(200);
@@ -475,7 +477,7 @@ void del() {
             cardsCount -= 1;
 
           }
-          Serial.print("\r\nbefore commit\r\n");
+          //Serial.print("\r\nbefore commit\r\n");
           dumpCards();
           for (int j = 0; j < cardsCount; j++)
             for (int k = 0; k < 4; k++)
@@ -489,7 +491,7 @@ void del() {
 
       EEPROM.commit();
     }
-    Serial.print("\r\nafter commit\r\n");
+    //Serial.print("\r\nafter commit\r\n");
     dumpCards();
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
   }
@@ -549,6 +551,19 @@ void togglePIN() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
+
+void toggleScanner() {
+  if (auth()) {
+    cfg[2] = !cfg[2];
+    if (cfg[2])
+      EEPROM.put(SCANNERENABLED, (uint8_t)1);
+    else
+      EEPROM.put(SCANNERENABLED, (uint8_t)0);
+    server.sendContent("HTTP/1.1 301 OK\r\nSet-Cookie: ESPSESSIONID=1\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
+    EEPROM.commit();
+  } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
+}
+
 String h2i(String d) {
   String r = "";
   for (int i = 0; i < 4; i++) {
@@ -561,7 +576,7 @@ String h2i(String d) {
 
 
 void barcodeCheck(String code) {
-  Serial.println("barcode check: " + code);
+  //Serial.println("barcode check: " + code);
   if (code.length() > 0) {
     code = h2i(code);
 
@@ -578,9 +593,6 @@ void barcodeCheck(String code) {
       card[i] = (uint8_t)code.substring(0, code.indexOf(':')).toInt();
       code = code.substring(code.indexOf(':') + 1, code.length());
     }
-    Serial.println("card: ");
-    for (int i = 0; i < 4; i++) Serial.print(card[i]);
-    Serial.println("");
     for (int i = 0; i < cardsCount; i++)
       if (arrcmp(cards[i], card))
         accessGranted();
@@ -614,11 +626,9 @@ void setup() {
 
 
   if (digitalRead(D0) == 1) {
-    Serial.println("RESETTING");
     clearData();
   }
   if (EEPROM.read(FIRSTRUN) == 1) {
-    Serial.println("FIRST CONFIG");
     firstRunConfig();
   }
   int q = 0;
@@ -627,7 +637,7 @@ void setup() {
   WiFi.begin("TEST", "TEST1234");
   while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
     delay(500);
-  } Serial.println(WiFi.localIP());
+  } Serial.println("IP: " + WiFi.localIP());
   WiFi.softAPdisconnect (true);
 
 
@@ -642,7 +652,9 @@ void setup() {
   server.on("/changePin", changePin);
   server.on("/togglePIN", togglePIN);
   server.on("/toggleNFC", toggleNFC);
+  server.on("/toggleScanner", toggleScanner);
   server.on("/changeLockTime", changeLockTime);
+
   server.onNotFound(handleNotFound);
 
   const char * headerkeys[] = {
@@ -657,6 +669,8 @@ void setup() {
 
   cfg[0] = EEPROM.read(NFCENABLED);
   cfg[1] = EEPROM.read(PASSENABLED);
+  cfg[2] = EEPROM.read(SCANNERENABLED);
+
   locktime = EEPROM.read(LOCKTIME);
   t2 = millis();
   uidLen = 0;
@@ -680,18 +694,6 @@ void loop() {
   server.handleClient();
 
   if (tries < 3) {
-    if (Serial.available() > 0) {
-      char bc = Serial.read();
-      if (bc == '\r') {
-        Serial.println("chars from barcode: "); Serial.print(barcode);
-        barcodeCheck(barcode);
-      }
-      else
-        barcode += bc;
-      // Serial.flush();
-    }
-
-
     if (millis() - t2 >= 500 && cfg[0])                                                             // check for new card
     {
       nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen, 100);
@@ -699,7 +701,6 @@ void loop() {
         if (arrcmp(uid, MasterID)) {
           if (!MasterAccess) {
             MasterAccess = true;
-            Serial.println("MASTER ACCESS ENTER");
             lcd.clear();
 
             lcd.clear();
@@ -712,7 +713,6 @@ void loop() {
             MasterAccess = false;
             lcd.clear();
             lcd.print("EXITING....");
-            Serial.println("MASTER ACCESS LEAVE");
             delay(1000);
             lcd.clear();
             lcd.print("ENTER PASS:");
@@ -761,7 +761,6 @@ void loop() {
       if (cfg[1]) {                                                       //PASSWORD ENABLED
         if (bs.available()) {
           c = bs.read();
-          // Serial.println("char from kb: " + c);
           if ((c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9' ) && password.length() < 9) {
             password += c;
             lcd.print("X");
@@ -779,6 +778,17 @@ void loop() {
             else
               accessDenied();
           }
+        }
+      }
+      if (cfg[2]) {                                                 //SCANNER ENABLED
+        if (Serial.available() > 0) {
+          char bc = Serial.read();
+          if (bc == '\r') {
+            barcodeCheck(barcode);
+          }
+          else
+            barcode += bc;
+          // Serial.flush();
         }
       }
     }
