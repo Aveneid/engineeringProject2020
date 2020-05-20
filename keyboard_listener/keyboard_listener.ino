@@ -26,6 +26,7 @@ void setup() {
   keyboard.begin(2, 3);
   while (!Serial);
 }
+int cn = 0;
 void loop() {
   if (keyboard.available()) {
     char c = keyboard.read();
@@ -38,8 +39,13 @@ void loop() {
       else {
         if (c != ':')
           Serial.write(c);
-        else
-          Serial.print(c);
+        else {
+          Serial.print(c); cn++;
+        }
+        if (cn == 3) {
+          Serial.println("");
+          cn = 0;
+        }
       }
     }
   }
