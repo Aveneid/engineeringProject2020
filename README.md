@@ -17,34 +17,6 @@ Poziom blokad i zabezpieczeń oraz postęp w ich wyłączaniu powinien być sygn
 możliwość uzbrajania poprzez sygnał WiFi np. aplikacja mobilna (smartfon).
 Do obsługi czujników i transmisji można wykorzystać dostępne biblioteki programistyczne.
 
-
-
-### Hardware used
- - [Arduino Nano](https://abc-rc.pl/product-pol-12737-NANO-V3-16MHz-USB-ATmega168P-odpowiednik-CH340-Klon-kompatybilny-z-Arduino.html) (AtMega328P)
- - [NodeMcu V3](https://abc-rc.pl/product-pol-7348-Modul-WIFI-ESP8266-NodeMcu-V3-CH340-Arduino-ESP12E.html) (ESP8266MOD)
- - Generic [16x2 LCD](https://abc-rc.pl/product-pol-6181-Wyswietlacz-LCD-2x16-niebieski-ze-sterownikiem-HD44780-QC1602A.html) with [I2C converter](https://abc-rc.pl/product-pol-6192-Konwerter-I2C-do-wyswietlacza-LCD-HD44780.html) (blue)
- - [RFID module](https://botland.com.pl/pl/moduly-i-tagi-rfid/8240-modul-rfidnfc-pn532-1356mhz-i2cspi-karta-i-brelok.html) - PN532 based
- - keypad from [Nano E](https://nano.novitus.pl/)
- - Barcode scanner - compatible with PS/2 standard
- 
-
-### Libraries used
-##### espmain.ino
-- LiquidCrystal_I2C
-- Wire
-- Adafruit_PN532
-- EEPROM
-- ESP8266WebServer
-- pgmspace
-- ESP8266WiFi
-- SoftwareSerial
-##### keyboard_listener.ino 
-- SoftwareSerial
-- PS2Keyboard
-- Keypad
-
-
-
 ## Usage
 
 When device is powered for fisrt time, it will have to be configured using simple wizard.
@@ -74,5 +46,32 @@ By shoting `D0` to +5V during boot an EEPROM clear will be performed, also defau
 All stored cards will be erased too! Be sure to add them after reset!
  
 
+## What's inside?
 
+### Hardware used
+ - [Arduino Nano](https://abc-rc.pl/product-pol-12737-NANO-V3-16MHz-USB-ATmega168P-odpowiednik-CH340-Klon-kompatybilny-z-Arduino.html) (AtMega328P)
+ - [NodeMcu V3](https://abc-rc.pl/product-pol-7348-Modul-WIFI-ESP8266-NodeMcu-V3-CH340-Arduino-ESP12E.html) (ESP8266MOD)
+ - Generic [16x2 LCD](https://abc-rc.pl/product-pol-6181-Wyswietlacz-LCD-2x16-niebieski-ze-sterownikiem-HD44780-QC1602A.html) with [I2C converter](https://abc-rc.pl/product-pol-6192-Konwerter-I2C-do-wyswietlacza-LCD-HD44780.html) (blue)
+ - [RFID module](https://botland.com.pl/pl/moduly-i-tagi-rfid/8240-modul-rfidnfc-pn532-1356mhz-i2cspi-karta-i-brelok.html) - PN532 based
+ - keypad from [Nano E](https://nano.novitus.pl/)
+ - Barcode scanner - compatible with PS/2 standard
+ 
+
+### Libraries used
+
+##### espmain.ino
+- LiquidCrystal_I2C
+- Wire
+- Adafruit_PN532
+- EEPROM
+- ESP8266WebServer
+- pgmspace
+- ESP8266WiFi
+- SoftwareSerial
+##### keyboard_listener.ino 
+- SoftwareSerial
+- PS2Keyboard
+- Keypad
+
+## License
 
