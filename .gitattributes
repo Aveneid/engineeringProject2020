@@ -1,3 +1,4 @@
+docs/* linguist-vendored
 # Sources
 *.c     text diff=c
 *.cc    text diff=cpp
