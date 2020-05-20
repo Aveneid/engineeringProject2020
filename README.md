@@ -56,18 +56,18 @@ For this step you will need:
 
 When first run wizard ends, device is ready. It will accept cards, pin codes or barcodes (using scanner), checks if they are known and let someone in or not.
 
-##### Adding or deleting cards
+#### Adding or deleting cards
 
 First you have to obtain master access (with card / token used in first run wizard), then bring card near RFID module to scan it. If card is present in device storage - will be deleted, otherwise will be added.
 
 Cards can be deleted using administrator panel via WWW.
 
-##### Changing settings
+#### Changing settings
 
 RFID module, pin code or barcode scanner can be disabled using administrator panel. Lock time, pin code or administrator password can be changed there as well. 
 Just open `http://smartlock/` to access administrator panel, login with adminstrator password (default 'admin') and here you go.
 
-##### Resetting to default 
+#### Resetting to default 
 If master card was stolen, pin was lost or something else theres always an option. 
 By shoting `D0` to +5V during boot an EEPROM clear will be performed, also default values of flags and passwords will be set.
 
