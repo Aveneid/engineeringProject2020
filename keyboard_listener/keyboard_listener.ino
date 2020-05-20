@@ -14,9 +14,11 @@ char keys[ROWS][COLS] = {
 byte rowPins[ROWS] = {A0, A1, A2, A3};
 byte colPins[COLS] = {12, 11, 10, 9, 8};
 
+//create keypad instance
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-SoftwareSerial bs(50, 4); // RX, TX
+// RX, TX for software serial
+SoftwareSerial bs(50, 4);
 
 PS2Keyboard keyboard;
 
@@ -40,10 +42,11 @@ void loop() {
         if (c != ':')
           Serial.write(c);
         else {
-          Serial.print(c); cn++;
+          cn++;
+          Serial.print(c);
         }
         if (cn == 3) {
-          Serial.println("");
+          Serial.println();
           cn = 0;
         }
       }

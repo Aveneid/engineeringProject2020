@@ -748,6 +748,7 @@ void loop() {
         }
       }
       return;
+      
     } else {
       //NFC ENABLED
       if (cfg[0]) {
@@ -758,9 +759,9 @@ void loop() {
             accessDenied();
         }
       }
-      //PASSWORD ENABLED
+      //PASSWORD ENABLED 
       if (cfg[1]) {
-        if (bs.available()) {
+        if (bs.available()) { 
           c = bs.read();
           if ((c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9' ) && password.length() < 9) {
             password += c;
