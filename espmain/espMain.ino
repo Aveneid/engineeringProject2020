@@ -9,6 +9,8 @@
 #include <ESP8266WiFi.h>
 
 
+#include <SoftwareSerial.h>
+
 /***
   EEPROM  DATA SCHEMA
   +--------------------------+---------------+
@@ -40,8 +42,9 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);  //create object for LCD class
 ESP8266WebServer server(80);       //enable server on port 80
+SoftwareSerial bs(D7, 50); // RX, TX
 
-Adafruit_PN532 nfc(D8, D7);          //rq rst
+Adafruit_PN532 nfc(D8, D6);          //rq rst
 
 
 
@@ -60,7 +63,7 @@ int retryTimerSeconds = 0;
 uint8_t uid[4], uidLen;              //card data
 String password = "";                //password holder
 char c;                              //incoming character holder
-
+String barcode = "";
 
 
 /*
@@ -214,18 +217,19 @@ bool checkPass(String pass) {
 void accessGranted() {
   lcd.clear();
   lcd.print("ACCESS GRANTED");
-
+  Serial.flush();
   tries = 0;
   retryTimerSeconds = 0;
   retryTimer = 0;
   password = "";
-
+  barcode = "";
   digitalWrite(OUT, HIGH);
   delay(3000);
   digitalWrite(OUT, LOW);
   lcd.clear();
   lcd.print("ENTER PASS:");
   lcd.setCursor(0, 1);
+
 }
 /*
     main function that refuses access
@@ -234,7 +238,10 @@ void accessDenied() {
   lcd.clear();
   lcd.print("ACCESS DENIED");
   password = "";
-
+  barcode = "";
+  retryTimerSeconds = 0;
+  retryTimer = 0;
+Serial.flush();
   tries = tries + 1;
   uidLen = 0;
   if (tries == 3) {
@@ -277,8 +284,8 @@ void firstRunConfig() {
 
   lcd.setCursor(0, 1);
   while (1) {
-    if (Serial.available()) {
-      c = Serial.read();
+    if (bs.available()) {
+      c = bs.read();
       if ((c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9' ) && password.length() < 9) {
         password += c;
         lcd.print(c);
@@ -542,6 +549,49 @@ void togglePIN() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
+String h2i(String d) {
+  String r = "";
+  for (int i = 0; i < 4; i++) {
+    r += strtol(d.substring(0, d.indexOf(':')).c_str(), 0, 16);
+    d = d.substring(d.indexOf(':') + 1, d.length());
+    r += ":";
+  }
+  return r;
+}
+
+
+void barcodeCheck(String code) {
+  Serial.println("barcode check: " + code);
+  if (code.length() > 0) {
+    code = h2i(code);
+
+    int cardsCount = EEPROM.read(USERCARDSCOUNT);
+    uint8_t cards[cardsCount][4];
+
+    for (int i = 0; i < cardsCount; i++)
+      for (int j = 0; j < 4; j++)
+        cards[i][j] = EEPROM.read(USERCARDS + i * CARDSIZE + j);
+
+    uint8_t card[] = {0, 0, 0, 0};
+
+    for (int i = 0; i < 4; i++) {
+      card[i] = (uint8_t)code.substring(0, code.indexOf(':')).toInt();
+      code = code.substring(code.indexOf(':') + 1, code.length());
+    }
+    Serial.println("card: ");
+    for (int i = 0; i < 4; i++) Serial.print(card[i]);
+    Serial.println("");
+    for (int i = 0; i < cardsCount; i++)
+      if (arrcmp(cards[i], card))
+        accessGranted();
+    return;
+  }
+  accessDenied();
+}
+
+
+
+
 /*
     main setup function
 */
@@ -549,7 +599,10 @@ void setup() {
   Serial.begin(74880);                 //serial for keyboard
   EEPROM.begin(512);                  //eeprom for config and data
   delay(50);
+  //while (!Serial);
 
+  bs.begin(9600);
+  //while (!bs);
   lcd.init();
   lcd.backlight();
 
@@ -576,7 +629,7 @@ void setup() {
     delay(500);
   } Serial.println(WiFi.localIP());
   WiFi.softAPdisconnect (true);
- 
+
 
   for (int l = 0; l < 4; l++)
     MasterID[l] = (uint8_t)EEPROM.read(MASTERCARDID + l);
@@ -616,14 +669,8 @@ void setup() {
      Serial.print(EEPROM.read(i));
      Serial.print(" ");
     }*/
-
+  Serial.flush();
 }
-
-//void loop() {}
-
-//#ifdef A
-
-
 /*
     main loop function
     provides control for RFID reader, password entry, admin access and others
@@ -633,6 +680,18 @@ void loop() {
   server.handleClient();
 
   if (tries < 3) {
+    if (Serial.available() > 0) {
+      char bc = Serial.read();
+      if (bc == '\r') {
+        Serial.println("chars from barcode: "); Serial.print(barcode);
+        barcodeCheck(barcode);
+      }
+      else
+        barcode += bc;
+      // Serial.flush();
+    }
+
+
     if (millis() - t2 >= 500 && cfg[0])                                                             // check for new card
     {
       nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A,  & uid[0],  & uidLen, 100);
@@ -700,8 +759,9 @@ void loop() {
         }
       }
       if (cfg[1]) {                                                       //PASSWORD ENABLED
-        if (Serial.available()) {
-          c = Serial.read();
+        if (bs.available()) {
+          c = bs.read();
+          // Serial.println("char from kb: " + c);
           if ((c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9' ) && password.length() < 9) {
             password += c;
             lcd.print("X");
@@ -728,7 +788,7 @@ void loop() {
       retryTimerSeconds++;
       retryTimer = millis();
     }
-  //  Serial.println(locktime * 60);
+    //  Serial.println(locktime * 60);
     if (retryTimerSeconds >= locktime * 60) {
       tries = 0;
       retryTimer = 0;
