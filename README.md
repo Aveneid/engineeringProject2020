@@ -28,6 +28,7 @@ Do obsługi czujników i transmisji można wykorzystać dostępne biblioteki pro
  - keypad from [Nano E](https://nano.novitus.pl/)
  - Barcode scanner - compatible with PS/2 standard
  
+
 ### Libraries used
 ##### espmain.ino
 - LiquidCrystal_I2C
@@ -42,6 +43,7 @@ Do obsługi czujników i transmisji można wykorzystać dostępne biblioteki pro
 - SoftwareSerial
 - PS2Keyboard
 - Keypad
+
 
 
 ## Usage
@@ -62,6 +64,16 @@ Cards can be deleted using administrator panel via WWW.
 
 ##### Changing settings
 
-RFID module, pin code or barcode scanner can be disabled using administrator panel. Lock time, pin code or administrator password can be changed there as well. Just open `http://smartlock/` to access administrator panel, login with adminstrator password (default 'admin') and here you go.
+RFID module, pin code or barcode scanner can be disabled using administrator panel. Lock time, pin code or administrator password can be changed there as well. 
+Just open `http://smartlock/` to access administrator panel, login with adminstrator password (default 'admin') and here you go.
+
+##### Resetting to default 
+If master card was stolen, pin was lost or something else theres always an option. 
+By shoting `D0` to +5V during boot an EEPROM clear will be performed, also default values of flags and passwords will be set.
+
+**:warning: Warning!**
+All stored cards will be erased too! Be sure to add them after reset!
+ 
+
 
 
