@@ -1,0 +1,773 @@
+.TH "espmain/espMain.cpp" 3 "Wed May 20 2020" "EngineeringProject2020" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+espmain/espMain.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <LiquidCrystal_I2C\&.h>\fP
+.br
+\fC#include <Wire\&.h>\fP
+.br
+\fC#include <Adafruit_PN532\&.h>\fP
+.br
+\fC#include <EEPROM\&.h>\fP
+.br
+\fC#include 'esppins\&.h'\fP
+.br
+\fC#include <ESP8266WebServer\&.h>\fP
+.br
+\fC#include <pgmspace\&.h>\fP
+.br
+\fC#include <ESP8266WiFi\&.h>\fP
+.br
+\fC#include <SoftwareSerial\&.h>\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBFIRSTRUN\fP   0"
+.br
+.RI "Address of first run flag stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBADMINPASS\fP   1"
+.br
+.RI "Address of admin password address stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBNFCENABLED\fP   9"
+.br
+.RI "Address of NFC enabled fla, stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBPASSENABLED\fP   10"
+.br
+.RI "Address of password enabled flag stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBSCANNERENABLED\fP   12"
+.br
+.RI "Address of scanner enabled flag stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBPINCODE\fP   12"
+.br
+.RI "Address of pin code value stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBMASTERCARDID\fP   20"
+.br
+.RI "Address of Master card ID stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBLOCKTIME\fP   24"
+.br
+.RI "Address of lock time in minutes stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBUSERCARDSCOUNT\fP   25"
+.br
+.RI "Address of count of reconized user cards stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBUSERCARDS\fP   26"
+.br
+.RI "Address of beginning of user cards data stored in EEPROM\&. "
+.ti -1c
+.RI "#define \fBOUT\fP   \fBD5\fP"
+.br
+.RI "Pin definition, will be pulled HIGH if access is granted\&. "
+.ti -1c
+.RI "#define \fBCARDSIZE\fP   4"
+.br
+.RI "Size of card in bytes\&. "
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "LiquidCrystal_I2C \fBlcd\fP (0x27, 16, 2)"
+.br
+.RI "Instance of LCD class, used to drive LCD display\&. "
+.ti -1c
+.RI "ESP8266WebServer \fBserver\fP (80)"
+.br
+.RI "Instance of ESP8266WebServer class, used for administrator panel\&. "
+.ti -1c
+.RI "SoftwareSerial \fBbs\fP (\fBD7\fP, 50)"
+.br
+.RI "Instance of SoftwareSerial class, used for keyboard communication\&. "
+.ti -1c
+.RI "Adafruit_PN532 \fBnfc\fP (\fBD8\fP, \fBD6\fP)"
+.br
+.RI "Instance of Adafruit_PN532 class, used for driving RFID module\&. "
+.ti -1c
+.RI "void \fBblk\fP ()"
+.br
+.RI "Switches display background for short period of time\&. "
+.ti -1c
+.RI "bool \fBarrcmp\fP (uint8_t a[4], uint8_t b[4])"
+.br
+.RI "Compares two arrays of uint8_t type\&. "
+.ti -1c
+.RI "void \fBclearData\fP ()"
+.br
+.RI "Performs EEPROM clear and fill with default values\&. "
+.ti -1c
+.RI "bool \fBaddDeleteCard\fP (uint8_t a[4])"
+.br
+.RI "Tries to find given as parameter card in EEPROM
+.br
+\&. "
+.ti -1c
+.RI "bool \fBfindCard\fP (uint8_t a[4])"
+.br
+.RI "Checks if scanned card is known
+.br
+\&. "
+.ti -1c
+.RI "bool \fBcheckPass\fP (String pass)"
+.br
+.RI "Checks if given given password is correct
+.br
+\&. "
+.ti -1c
+.RI "void \fBaccessGranted\fP ()"
+.br
+.RI "Function that grants access to protected zone when called\&. "
+.ti -1c
+.RI "void \fBaccessDenied\fP ()"
+.br
+.RI "Function that refuses access to protected zone when called\&. "
+.ti -1c
+.RI "void \fBfirstRunConfig\fP ()"
+.br
+.RI "Function that provides \fCfirst run config\fP for owner / administrator 
+.br
+ Triggered by hardware button\&. "
+.ti -1c
+.RI "bool \fBauth\fP ()"
+.br
+.RI "Function that handles user authentication via WWW 
+.br
+\&. "
+.ti -1c
+.RI "void \fBhandleNotFound\fP ()"
+.br
+.RI "Function that handles 404 error on server, applies when someone want to acces file (or path) that is not found\&. "
+.ti -1c
+.RI "void \fBchangePass\fP ()"
+.br
+.RI "Function that handles admin password change for administrator panel via WWW, works only if user is admin\&. "
+.ti -1c
+.RI "void \fBchangePin\fP ()"
+.br
+.RI "Function that changes access pin code, works only if user is admin 
+.br
+ "
+.ti -1c
+.RI "void \fBchangeLockTime\fP ()"
+.br
+.RI "Function that changes lock time(in minutes), works only if user is admin\&. "
+.ti -1c
+.RI "void \fBhandleRoot\fP ()"
+.br
+.RI "Function that handles main index file via WWW, prompts for password, if correct will redirect to admin panel 
+.br
+ "
+.ti -1c
+.RI "void \fBdumpCards\fP ()"
+.br
+.RI "Function that dumps all saved cards to Serial port\&. "
+.ti -1c
+.RI "void \fBdel\fP ()"
+.br
+.RI "Function that delete card from storage if card is present, works only if user is admin\&. "
+.ti -1c
+.RI "void \fBlogin\fP ()"
+.br
+.RI "Function that handles admin panel login
+.br
+ Redirects to admin panel if login was successful\&. "
+.ti -1c
+.RI "void \fBtoggleNFC\fP ()"
+.br
+.RI "Function that toggles NFC from http request, works only if user is admin\&. "
+.ti -1c
+.RI "void \fBtogglePIN\fP ()"
+.br
+.RI "Function that toggles pin code from http request, works only if user is admin\&. "
+.ti -1c
+.RI "void \fBtoggleScanner\fP ()"
+.br
+.RI "Funciton that toggles scanner from http request, works only if user is admin\&. "
+.ti -1c
+.RI "String \fBh2i\fP (String d)"
+.br
+.RI "Function that converts string in HEX format
+.br
+ for example: AC:3D:FF:A0 to its DEC format
+.br
+ like: 172:61:255:160\&. "
+.ti -1c
+.RI "void \fBbarcodeCheck\fP (String code)"
+.br
+.RI "Function that handles barcode scanner code check 
+.br
+ Grants or denies access to protected zone regarding to \fBarrcmp()\fP return value\&. "
+.ti -1c
+.RI "void \fBsetup\fP ()"
+.br
+.RI "Main setup function
+.br
+ Sets parameters for class objects, connects to Wi-Fi
+.br
+ Reads data from EEPROM to RAM\&. "
+.ti -1c
+.RI "void \fBloop\fP ()"
+.br
+.RI "Main loop function
+.br
+ Provides control for RFID reader 
+.br
+ password entry, admin access and others\&. "
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "uint8_t \fBtries\fP = 0"
+.br
+.RI "Counter for tries, if entered data is incorrect, it will increment by 1\&. "
+.ti -1c
+.RI "int \fBlocktime\fP = 5"
+.br
+.RI "Current lock time (in minutes) "
+.ti -1c
+.RI "bool \fBcfg\fP [3]"
+.br
+.RI "Feature flags, each one is for NFC, password and barcode scanner respectively\&. "
+.ti -1c
+.RI "bool \fBMasterAccess\fP = false"
+.br
+.RI "Flag for master access, filps when master card was readed\&. "
+.ti -1c
+.RI "uint8_t \fBMasterID\fP [4]"
+.br
+.RI "Master card ID - to prevent future reads from EEPROM to save some time and power\&. "
+.ti -1c
+.RI "unsigned long \fBt2\fP"
+.br
+.RI "Counter for card scanner\&. "
+.ti -1c
+.RI "unsigned long \fBretryTimer\fP"
+.br
+.RI "Variable for timing\&. "
+.ti -1c
+.RI "unsigned long \fBcurMilis\fP"
+.br
+.RI "Variable for timing\&. "
+.ti -1c
+.RI "int \fBretryTimerSeconds\fP = 0"
+.br
+.RI "Counter that count how many seconds pass when lock triggered\&. "
+.ti -1c
+.RI "uint8_t \fBuid\fP [4]"
+.br
+.RI "Card data - used when new card is present and scanned\&. "
+.ti -1c
+.RI "uint8_t \fBuidLen\fP"
+.br
+.ti -1c
+.RI "String \fBpassword\fP = ''"
+.br
+.RI "Password holder\&. "
+.ti -1c
+.RI "char \fBc\fP"
+.br
+.RI "Incoming character holder\&. "
+.ti -1c
+.RI "String \fBbarcode\fP = ''"
+.br
+.RI "Barcode holder - used when new barcode was readed\&. "
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define ADMINPASS   1"
+
+.PP
+Address of admin password address stored in EEPROM\&. 
+.PP
+Definition at line 36 of file espMain\&.cpp\&.
+.SS "#define CARDSIZE   4"
+
+.PP
+Size of card in bytes\&. 
+.PP
+Definition at line 56 of file espMain\&.cpp\&.
+.SS "#define FIRSTRUN   0"
+
+.PP
+Address of first run flag stored in EEPROM\&. 
+.PP
+Definition at line 34 of file espMain\&.cpp\&.
+.SS "#define LOCKTIME   24"
+
+.PP
+Address of lock time in minutes stored in EEPROM\&. 
+.PP
+Definition at line 48 of file espMain\&.cpp\&.
+.SS "#define MASTERCARDID   20"
+
+.PP
+Address of Master card ID stored in EEPROM\&. 
+.PP
+Definition at line 46 of file espMain\&.cpp\&.
+.SS "#define NFCENABLED   9"
+
+.PP
+Address of NFC enabled fla, stored in EEPROM\&. 
+.PP
+Definition at line 38 of file espMain\&.cpp\&.
+.SS "#define OUT   \fBD5\fP"
+
+.PP
+Pin definition, will be pulled HIGH if access is granted\&. 
+.PP
+Definition at line 54 of file espMain\&.cpp\&.
+.SS "#define PASSENABLED   10"
+
+.PP
+Address of password enabled flag stored in EEPROM\&. 
+.PP
+Definition at line 40 of file espMain\&.cpp\&.
+.SS "#define PINCODE   12"
+
+.PP
+Address of pin code value stored in EEPROM\&. 
+.PP
+Definition at line 44 of file espMain\&.cpp\&.
+.SS "#define SCANNERENABLED   12"
+
+.PP
+Address of scanner enabled flag stored in EEPROM\&. 
+.PP
+Definition at line 42 of file espMain\&.cpp\&.
+.SS "#define USERCARDS   26"
+
+.PP
+Address of beginning of user cards data stored in EEPROM\&. 
+.PP
+Definition at line 52 of file espMain\&.cpp\&.
+.SS "#define USERCARDSCOUNT   25"
+
+.PP
+Address of count of reconized user cards stored in EEPROM\&. 
+.PP
+Definition at line 50 of file espMain\&.cpp\&.
+.SH "Function Documentation"
+.PP 
+.SS "void accessDenied ()"
+
+.PP
+Function that refuses access to protected zone when called\&. 
+.PP
+Definition at line 292 of file espMain\&.cpp\&.
+.SS "void accessGranted ()"
+
+.PP
+Function that grants access to protected zone when called\&. 
+.PP
+Definition at line 272 of file espMain\&.cpp\&.
+.SS "bool addDeleteCard (uint8_t a[4])"
+
+.PP
+Tries to find given as parameter card in EEPROM
+.br
+\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIa\fP array - card data - to add or delete 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if card found and deleted 
+.br
+ false if card not found and added 
+.RE
+.PP
+
+.PP
+Definition at line 179 of file espMain\&.cpp\&.
+.SS "bool arrcmp (uint8_t a[4], uint8_t b[4])"
+
+.PP
+Compares two arrays of uint8_t type\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIa\fP first array 
+.br
+\fIb\fP second array 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if arrays are the same 
+.PP
+false if arrays are different 
+.RE
+.PP
+
+.PP
+Definition at line 147 of file espMain\&.cpp\&.
+.SS "bool auth ()"
+
+.PP
+Function that handles user authentication via WWW 
+.br
+\&. 
+.PP
+\fBReturns\fP
+.RS 4
+true if specific cookie is set 
+.br
+ 
+.PP
+false if not 
+.RE
+.PP
+
+.PP
+Definition at line 383 of file espMain\&.cpp\&.
+.SS "void barcodeCheck (String code)"
+
+.PP
+Function that handles barcode scanner code check 
+.br
+ Grants or denies access to protected zone regarding to \fBarrcmp()\fP return value\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIcode\fP String in format aa:bb:cc:dd where aa,bb,cc,dd in range of 00-FF 
+.RE
+.PP
+
+.PP
+Definition at line 665 of file espMain\&.cpp\&.
+.SS "void blk ()"
+
+.PP
+Switches display background for short period of time\&. 
+.PP
+Definition at line 131 of file espMain\&.cpp\&.
+.SS "SoftwareSerial bs (\fBD7\fP, 50)"
+
+.PP
+Instance of SoftwareSerial class, used for keyboard communication\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fID7\fP Receive pin 
+.br
+\fI50\fP Transmit pin (not used) 
+.RE
+.PP
+
+.SS "void changeLockTime ()"
+
+.PP
+Function that changes lock time(in minutes), works only if user is admin\&. 
+.PP
+Definition at line 447 of file espMain\&.cpp\&.
+.SS "void changePass ()"
+
+.PP
+Function that handles admin password change for administrator panel via WWW, works only if user is admin\&. 
+.PP
+Definition at line 405 of file espMain\&.cpp\&.
+.SS "void changePin ()"
+
+.PP
+Function that changes access pin code, works only if user is admin 
+.br
+ 
+.PP
+Definition at line 426 of file espMain\&.cpp\&.
+.SS "bool checkPass (String pass)"
+
+.PP
+Checks if given given password is correct
+.br
+\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpass\fP Password to be checked 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if is valid 
+.PP
+false if is not valid 
+.RE
+.PP
+
+.PP
+Definition at line 253 of file espMain\&.cpp\&.
+.SS "void clearData ()"
+
+.PP
+Performs EEPROM clear and fill with default values\&. 
+.PP
+Definition at line 157 of file espMain\&.cpp\&.
+.SS "void del ()"
+
+.PP
+Function that delete card from storage if card is present, works only if user is admin\&. 
+.PP
+Definition at line 516 of file espMain\&.cpp\&.
+.SS "void dumpCards ()"
+
+.PP
+Function that dumps all saved cards to Serial port\&. 
+.PP
+Definition at line 502 of file espMain\&.cpp\&.
+.SS "bool findCard (uint8_t a[4])"
+
+.PP
+Checks if scanned card is known
+.br
+\&. 
+.PP
+\fBReturns\fP
+.RS 4
+true if known
+.br
+ 
+.PP
+false if not 
+.RE
+.PP
+
+.PP
+Definition at line 228 of file espMain\&.cpp\&.
+.SS "void firstRunConfig ()"
+
+.PP
+Function that provides \fCfirst run config\fP for owner / administrator 
+.br
+ Triggered by hardware button\&. 
+.PP
+Definition at line 318 of file espMain\&.cpp\&.
+.SS "String h2i (String d)"
+
+.PP
+Function that converts string in HEX format
+.br
+ for example: AC:3D:FF:A0 to its DEC format
+.br
+ like: 172:61:255:160\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fId\fP valid HEX string 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+integer representation of HEX values in string 
+.RE
+.PP
+
+.PP
+Definition at line 649 of file espMain\&.cpp\&.
+.SS "void handleNotFound ()"
+
+.PP
+Function that handles 404 error on server, applies when someone want to acces file (or path) that is not found\&. 
+.PP
+Definition at line 396 of file espMain\&.cpp\&.
+.SS "void handleRoot ()"
+
+.PP
+Function that handles main index file via WWW, prompts for password, if correct will redirect to admin panel 
+.br
+ 
+.PP
+Definition at line 473 of file espMain\&.cpp\&.
+.SS "LiquidCrystal_I2C lcd (0x27, 16, 2)"
+
+.PP
+Instance of LCD class, used to drive LCD display\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fI0x27\fP Address of LCD in I2C bus 
+.br
+\fI16\fP Number of columns 
+.br
+\fI2\fP number of lines 
+.RE
+.PP
+
+.SS "void login ()"
+
+.PP
+Function that handles admin panel login
+.br
+ Redirects to admin panel if login was successful\&. 
+.PP
+Definition at line 568 of file espMain\&.cpp\&.
+.SS "void loop ()"
+
+.PP
+Main loop function
+.br
+ Provides control for RFID reader 
+.br
+ password entry, admin access and others\&. 
+.PP
+Definition at line 779 of file espMain\&.cpp\&.
+.SS "Adafruit_PN532 nfc (\fBD8\fP, \fBD6\fP)"
+
+.PP
+Instance of Adafruit_PN532 class, used for driving RFID module\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fID8\fP RQ pin 
+.br
+\fID6\fP RST pin 
+.RE
+.PP
+
+.SS "ESP8266WebServer server (80)"
+
+.PP
+Instance of ESP8266WebServer class, used for administrator panel\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fI80\fP Port for webserver 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Return description 
+.RE
+.PP
+
+.SS "void setup ()"
+
+.PP
+Main setup function
+.br
+ Sets parameters for class objects, connects to Wi-Fi
+.br
+ Reads data from EEPROM to RAM\&. 
+.PP
+Definition at line 698 of file espMain\&.cpp\&.
+.SS "void toggleNFC ()"
+
+.PP
+Function that toggles NFC from http request, works only if user is admin\&. 
+.PP
+Definition at line 601 of file espMain\&.cpp\&.
+.SS "void togglePIN ()"
+
+.PP
+Function that toggles pin code from http request, works only if user is admin\&. 
+.PP
+Definition at line 615 of file espMain\&.cpp\&.
+.SS "void toggleScanner ()"
+
+.PP
+Funciton that toggles scanner from http request, works only if user is admin\&. 
+.PP
+Definition at line 629 of file espMain\&.cpp\&.
+.SH "Variable Documentation"
+.PP 
+.SS "String barcode = ''"
+
+.PP
+Barcode holder - used when new barcode was readed\&. 
+.PP
+Definition at line 125 of file espMain\&.cpp\&.
+.SS "char c"
+
+.PP
+Incoming character holder\&. 
+.PP
+Definition at line 123 of file espMain\&.cpp\&.
+.SS "bool cfg[3]"
+
+.PP
+Feature flags, each one is for NFC, password and barcode scanner respectively\&. 
+.PP
+Definition at line 100 of file espMain\&.cpp\&.
+.SS "unsigned long curMilis"
+
+.PP
+Variable for timing\&. 
+.PP
+Definition at line 113 of file espMain\&.cpp\&.
+.SS "int locktime = 5"
+
+.PP
+Current lock time (in minutes) 
+.PP
+Definition at line 97 of file espMain\&.cpp\&.
+.SS "bool MasterAccess = false"
+
+.PP
+Flag for master access, filps when master card was readed\&. 
+.PP
+Definition at line 102 of file espMain\&.cpp\&.
+.SS "uint8_t MasterID[4]"
+
+.PP
+Master card ID - to prevent future reads from EEPROM to save some time and power\&. 
+.PP
+Definition at line 105 of file espMain\&.cpp\&.
+.SS "String password = ''"
+
+.PP
+Password holder\&. 
+.PP
+Definition at line 121 of file espMain\&.cpp\&.
+.SS "unsigned long retryTimer"
+
+.PP
+Variable for timing\&. 
+.PP
+Definition at line 111 of file espMain\&.cpp\&.
+.SS "int retryTimerSeconds = 0"
+
+.PP
+Counter that count how many seconds pass when lock triggered\&. 
+.PP
+Definition at line 115 of file espMain\&.cpp\&.
+.SS "unsigned long t2"
+
+.PP
+Counter for card scanner\&. 
+.PP
+Definition at line 108 of file espMain\&.cpp\&.
+.SS "uint8_t tries = 0"
+
+.PP
+Counter for tries, if entered data is incorrect, it will increment by 1\&. 
+.PP
+Definition at line 95 of file espMain\&.cpp\&.
+.SS "uint8_t uid[4]"
+
+.PP
+Card data - used when new card is present and scanned\&. 
+.PP
+Definition at line 119 of file espMain\&.cpp\&.
+.SS "uint8_t uidLen"
+
+.PP
+Definition at line 119 of file espMain\&.cpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for EngineeringProject2020 from the source code\&.

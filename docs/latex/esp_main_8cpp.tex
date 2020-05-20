@@ -1,0 +1,1006 @@
+\hypertarget{esp_main_8cpp}{}\doxysection{espmain/esp\+Main.cpp File Reference}
+\label{esp_main_8cpp}\index{espmain/espMain.cpp@{espmain/espMain.cpp}}
+{\ttfamily \#include $<$Liquid\+Crystal\+\_\+\+I2\+C.\+h$>$}\newline
+{\ttfamily \#include $<$Wire.\+h$>$}\newline
+{\ttfamily \#include $<$Adafruit\+\_\+\+P\+N532.\+h$>$}\newline
+{\ttfamily \#include $<$E\+E\+P\+R\+O\+M.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}esppins.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$E\+S\+P8266\+Web\+Server.\+h$>$}\newline
+{\ttfamily \#include $<$pgmspace.\+h$>$}\newline
+{\ttfamily \#include $<$E\+S\+P8266\+Wi\+Fi.\+h$>$}\newline
+{\ttfamily \#include $<$Software\+Serial.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_a4f4a4732642475b5a21c0a1a8c2ed4b2}{F\+I\+R\+S\+T\+R\+UN}}~0
+\begin{DoxyCompactList}\small\item\em Address of first run flag stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_ad9477fc87b3bc318cbb565aa2d693a33}{A\+D\+M\+I\+N\+P\+A\+SS}}~1
+\begin{DoxyCompactList}\small\item\em Address of admin password address stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_a1a23bceef583febf4ea0b4530553df4a}{N\+F\+C\+E\+N\+A\+B\+L\+ED}}~9
+\begin{DoxyCompactList}\small\item\em Address of N\+FC enabled fla, stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_a39bf5834616a3adabbb1bf784ab567f0}{P\+A\+S\+S\+E\+N\+A\+B\+L\+ED}}~10
+\begin{DoxyCompactList}\small\item\em Address of password enabled flag stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_ae1f79f6ad050ef88ccc89c4915c2e1a3}{S\+C\+A\+N\+N\+E\+R\+E\+N\+A\+B\+L\+ED}}~12
+\begin{DoxyCompactList}\small\item\em Address of scanner enabled flag stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_a79a73bb2ba87b67c000cb44ae5cc8461}{P\+I\+N\+C\+O\+DE}}~12
+\begin{DoxyCompactList}\small\item\em Address of pin code value stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_adbf5c1cecea9d1c02fab359975314812}{M\+A\+S\+T\+E\+R\+C\+A\+R\+D\+ID}}~20
+\begin{DoxyCompactList}\small\item\em Address of Master card ID stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_a2a4a2f4e5b76007972bc9056290a66d8}{L\+O\+C\+K\+T\+I\+ME}}~24
+\begin{DoxyCompactList}\small\item\em Address of lock time in minutes stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_a46b3161d72445324482d5768e9d440ef}{U\+S\+E\+R\+C\+A\+R\+D\+S\+C\+O\+U\+NT}}~25
+\begin{DoxyCompactList}\small\item\em Address of count of reconized user cards stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_afff112f83aa99ca2339e4e808cb34bc0}{U\+S\+E\+R\+C\+A\+R\+DS}}~26
+\begin{DoxyCompactList}\small\item\em Address of beginning of user cards data stored in E\+E\+P\+R\+OM. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_aec78e7a9e90a406a56f859ee456e8eae}{O\+UT}}~\mbox{\hyperlink{esppins_8h_a2ddd4183d444d6d128cbdbd6269e4e0c}{D5}}
+\begin{DoxyCompactList}\small\item\em Pin definition, will be pulled H\+I\+GH if access is granted. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{esp_main_8cpp_a5b04e074b3b19739586edb1f826f6c63}{C\+A\+R\+D\+S\+I\+ZE}}~4
+\begin{DoxyCompactList}\small\item\em Size of card in bytes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+Liquid\+Crystal\+\_\+\+I2C \mbox{\hyperlink{esp_main_8cpp_ae084e1bc8ccb35ea289ba0ca4972ea6d}{lcd}} (0x27, 16, 2)
+\begin{DoxyCompactList}\small\item\em Instance of L\+CD class, used to drive L\+CD display. \end{DoxyCompactList}\item 
+E\+S\+P8266\+Web\+Server \mbox{\hyperlink{esp_main_8cpp_a58141c4f251beaa1fee89b632d87152f}{server}} (80)
+\begin{DoxyCompactList}\small\item\em Instance of E\+S\+P8266\+Web\+Server class, used for administrator panel. \end{DoxyCompactList}\item 
+Software\+Serial \mbox{\hyperlink{esp_main_8cpp_a8d32936782148258b6ead0b4f659696e}{bs}} (\mbox{\hyperlink{esppins_8h_a2ba78f059a7ebebc95e7beef690e88d6}{D7}}, 50)
+\begin{DoxyCompactList}\small\item\em Instance of Software\+Serial class, used for keyboard communication. \end{DoxyCompactList}\item 
+Adafruit\+\_\+\+P\+N532 \mbox{\hyperlink{esp_main_8cpp_a3f9c6f905d1dcd952bff709aeac33026}{nfc}} (\mbox{\hyperlink{esppins_8h_a9711ce54c7a380964a5b4dbac7da12e2}{D8}}, \mbox{\hyperlink{esppins_8h_a79a18a7f5ccf7a7ca31f302bd62527a6}{D6}})
+\begin{DoxyCompactList}\small\item\em Instance of Adafruit\+\_\+\+P\+N532 class, used for driving R\+F\+ID module. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_ac6b9dd166f68695ebf79df00dc7621a2}{blk}} ()
+\begin{DoxyCompactList}\small\item\em Switches display background for short period of time. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{esp_main_8cpp_a8de469820adb093cbd4e30c1017467e8}{arrcmp}} (uint8\+\_\+t a\mbox{[}4\mbox{]}, uint8\+\_\+t b\mbox{[}4\mbox{]})
+\begin{DoxyCompactList}\small\item\em Compares two arrays of uint8\+\_\+t type. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_abd4e5c937c4b98dd42745acb33815cdf}{clear\+Data}} ()
+\begin{DoxyCompactList}\small\item\em Performs E\+E\+P\+R\+OM clear and fill with default values. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{esp_main_8cpp_aef8641731cb6a821e44f8ff6b362a857}{add\+Delete\+Card}} (uint8\+\_\+t a\mbox{[}4\mbox{]})
+\begin{DoxyCompactList}\small\item\em Tries to find given as parameter card in E\+E\+P\+R\+OM~\newline
+. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{esp_main_8cpp_ace53b0ca7082fc33a480c32996449ccb}{find\+Card}} (uint8\+\_\+t a\mbox{[}4\mbox{]})
+\begin{DoxyCompactList}\small\item\em Checks if scanned card is known~\newline
+. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{esp_main_8cpp_a37aefd83c7026936272e56f60431543e}{check\+Pass}} (String pass)
+\begin{DoxyCompactList}\small\item\em Checks if given given password is correct~\newline
+. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a0a50f3e2249e3243752571912b87eb97}{access\+Granted}} ()
+\begin{DoxyCompactList}\small\item\em Function that grants access to protected zone when called. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a60ade2b254782a09199c5486752ee98d}{access\+Denied}} ()
+\begin{DoxyCompactList}\small\item\em Function that refuses access to protected zone when called. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a861e3823eb1f21ac46bf46cb52b63f21}{first\+Run\+Config}} ()
+\begin{DoxyCompactList}\small\item\em Function that provides {\ttfamily first run config} for owner / administrator ~\newline
+ Triggered by hardware button. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{esp_main_8cpp_abe175b2028d177e1d6799f3823812a36}{auth}} ()
+\begin{DoxyCompactList}\small\item\em Function that handles user authentication via W\+WW ~\newline
+. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a54f2b176a577c7a89bb94da4f12cd06b}{handle\+Not\+Found}} ()
+\begin{DoxyCompactList}\small\item\em Function that handles 404 error on server, applies when someone want to acces file (or path) that is not found. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a002b81f5218fb07fc2683986508b6a5c}{change\+Pass}} ()
+\begin{DoxyCompactList}\small\item\em Function that handles admin password change for administrator panel via W\+WW, works only if user is admin. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_ab4307affbe0bbfb62bc80dd2ad91f489}{change\+Pin}} ()
+\begin{DoxyCompactList}\small\item\em Function that changes access pin code, works only if user is admin ~\newline
+ \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a045cd6579bf9a26fe79a930a8bc1ba0d}{change\+Lock\+Time}} ()
+\begin{DoxyCompactList}\small\item\em Function that changes lock time(in minutes), works only if user is admin. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a8427468f39342a1990703e9f5ce7fd29}{handle\+Root}} ()
+\begin{DoxyCompactList}\small\item\em Function that handles main index file via W\+WW, prompts for password, if correct will redirect to admin panel ~\newline
+ \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a42485aec8674a8641acef7bf90c6791c}{dump\+Cards}} ()
+\begin{DoxyCompactList}\small\item\em Function that dumps all saved cards to Serial port. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a13120ea5788aaacf44a89b193a0cceef}{del}} ()
+\begin{DoxyCompactList}\small\item\em Function that delete card from storage if card is present, works only if user is admin. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_af76b7b46958dabf5e4ee9a492f0ec3fa}{login}} ()
+\begin{DoxyCompactList}\small\item\em Function that handles admin panel login~\newline
+ Redirects to admin panel if login was successful. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a2b2b4794d662937937667bfe4b73fbd9}{toggle\+N\+FC}} ()
+\begin{DoxyCompactList}\small\item\em Function that toggles N\+FC from http request, works only if user is admin. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_aa16e0df179df0f736e6adaaf59e50a2f}{toggle\+P\+IN}} ()
+\begin{DoxyCompactList}\small\item\em Function that toggles pin code from http request, works only if user is admin. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a0b383934d7a19716d80cdbc9cef1d939}{toggle\+Scanner}} ()
+\begin{DoxyCompactList}\small\item\em Funciton that toggles scanner from http request, works only if user is admin. \end{DoxyCompactList}\item 
+String \mbox{\hyperlink{esp_main_8cpp_afae9461fefb7a9040ae40721723a63af}{h2i}} (String d)
+\begin{DoxyCompactList}\small\item\em Function that converts string in H\+EX format~\newline
+ for example\+: AC\+:3D\+:\+FF\+:A0 to its D\+EC format~\newline
+ like\+: 172\+:61\+:255\+:160. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a935aa29c9921acef08e3b131eb4fd5e6}{barcode\+Check}} (String code)
+\begin{DoxyCompactList}\small\item\em Function that handles barcode scanner code check ~\newline
+ Grants or denies access to protected zone regarding to \mbox{\hyperlink{esp_main_8cpp_a8de469820adb093cbd4e30c1017467e8}{arrcmp()}} return value. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_a4fc01d736fe50cf5b977f755b675f11d}{setup}} ()
+\begin{DoxyCompactList}\small\item\em Main setup function~\newline
+ Sets parameters for class objects, connects to Wi-\/\+Fi~\newline
+ Reads data from E\+E\+P\+R\+OM to R\+AM. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{esp_main_8cpp_afe461d27b9c48d5921c00d521181f12f}{loop}} ()
+\begin{DoxyCompactList}\small\item\em Main loop function~\newline
+ Provides control for R\+F\+ID reader ~\newline
+ password entry, admin access and others. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{esp_main_8cpp_a5522305c1de4f07a6c6feb7275863f8f}{tries}} = 0
+\begin{DoxyCompactList}\small\item\em Counter for tries, if entered data is incorrect, it will increment by 1. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{esp_main_8cpp_ae6d77325c24fc3cc936e5b158fc728a8}{locktime}} = 5
+\begin{DoxyCompactList}\small\item\em Current lock time (in minutes) \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{esp_main_8cpp_a68b7079790a59184d8dad88a7b785d1d}{cfg}} \mbox{[}3\mbox{]}
+\begin{DoxyCompactList}\small\item\em Feature flags, each one is for N\+FC, password and barcode scanner respectively. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{esp_main_8cpp_a4f9000ade72a94e56e8754c80e3277e4}{Master\+Access}} = false
+\begin{DoxyCompactList}\small\item\em Flag for master access, filps when master card was readed. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{esp_main_8cpp_adb056f61dd84394f3fbce0ae57e3a9f8}{Master\+ID}} \mbox{[}4\mbox{]}
+\begin{DoxyCompactList}\small\item\em Master card ID -\/ to prevent future reads from E\+E\+P\+R\+OM to save some time and power. \end{DoxyCompactList}\item 
+unsigned long \mbox{\hyperlink{esp_main_8cpp_a57839e9b66863b4b735047218e335bb4}{t2}}
+\begin{DoxyCompactList}\small\item\em Counter for card scanner. \end{DoxyCompactList}\item 
+unsigned long \mbox{\hyperlink{esp_main_8cpp_a200e606a81c42adc2761ce417ec683be}{retry\+Timer}}
+\begin{DoxyCompactList}\small\item\em Variable for timing. \end{DoxyCompactList}\item 
+unsigned long \mbox{\hyperlink{esp_main_8cpp_a44c5e0b2c9685d0004d76cd89b851b21}{cur\+Milis}}
+\begin{DoxyCompactList}\small\item\em Variable for timing. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{esp_main_8cpp_a27c4560b1c293b674da26db67188d836}{retry\+Timer\+Seconds}} = 0
+\begin{DoxyCompactList}\small\item\em Counter that count how many seconds pass when lock triggered. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{esp_main_8cpp_a532ddf10106a8db0dcc3356428fcf4d2}{uid}} \mbox{[}4\mbox{]}
+\begin{DoxyCompactList}\small\item\em Card data -\/ used when new card is present and scanned. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{esp_main_8cpp_aed2a08e1fa3bcb2dd04d19553a1df51c}{uid\+Len}}
+\item 
+String \mbox{\hyperlink{esp_main_8cpp_acbd76b816d055b7a642c219fd9751020}{password}} = \char`\"{}\char`\"{}
+\begin{DoxyCompactList}\small\item\em Password holder. \end{DoxyCompactList}\item 
+char \mbox{\hyperlink{esp_main_8cpp_adc08ed1554f35803d229aeaf11216b3f}{c}}
+\begin{DoxyCompactList}\small\item\em Incoming character holder. \end{DoxyCompactList}\item 
+String \mbox{\hyperlink{esp_main_8cpp_ac3f465af0f3796a4ed8db4d37d78dc82}{barcode}} = \char`\"{}\char`\"{}
+\begin{DoxyCompactList}\small\item\em Barcode holder -\/ used when new barcode was readed. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{esp_main_8cpp_ad9477fc87b3bc318cbb565aa2d693a33}\label{esp_main_8cpp_ad9477fc87b3bc318cbb565aa2d693a33}} 
+\index{espMain.cpp@{espMain.cpp}!ADMINPASS@{ADMINPASS}}
+\index{ADMINPASS@{ADMINPASS}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{ADMINPASS}{ADMINPASS}}
+{\footnotesize\ttfamily \#define A\+D\+M\+I\+N\+P\+A\+SS~1}
+
+
+
+Address of admin password address stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 36 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a5b04e074b3b19739586edb1f826f6c63}\label{esp_main_8cpp_a5b04e074b3b19739586edb1f826f6c63}} 
+\index{espMain.cpp@{espMain.cpp}!CARDSIZE@{CARDSIZE}}
+\index{CARDSIZE@{CARDSIZE}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{CARDSIZE}{CARDSIZE}}
+{\footnotesize\ttfamily \#define C\+A\+R\+D\+S\+I\+ZE~4}
+
+
+
+Size of card in bytes. 
+
+
+
+Definition at line 56 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a4f4a4732642475b5a21c0a1a8c2ed4b2}\label{esp_main_8cpp_a4f4a4732642475b5a21c0a1a8c2ed4b2}} 
+\index{espMain.cpp@{espMain.cpp}!FIRSTRUN@{FIRSTRUN}}
+\index{FIRSTRUN@{FIRSTRUN}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{FIRSTRUN}{FIRSTRUN}}
+{\footnotesize\ttfamily \#define F\+I\+R\+S\+T\+R\+UN~0}
+
+
+
+Address of first run flag stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 34 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a2a4a2f4e5b76007972bc9056290a66d8}\label{esp_main_8cpp_a2a4a2f4e5b76007972bc9056290a66d8}} 
+\index{espMain.cpp@{espMain.cpp}!LOCKTIME@{LOCKTIME}}
+\index{LOCKTIME@{LOCKTIME}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{LOCKTIME}{LOCKTIME}}
+{\footnotesize\ttfamily \#define L\+O\+C\+K\+T\+I\+ME~24}
+
+
+
+Address of lock time in minutes stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 48 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_adbf5c1cecea9d1c02fab359975314812}\label{esp_main_8cpp_adbf5c1cecea9d1c02fab359975314812}} 
+\index{espMain.cpp@{espMain.cpp}!MASTERCARDID@{MASTERCARDID}}
+\index{MASTERCARDID@{MASTERCARDID}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{MASTERCARDID}{MASTERCARDID}}
+{\footnotesize\ttfamily \#define M\+A\+S\+T\+E\+R\+C\+A\+R\+D\+ID~20}
+
+
+
+Address of Master card ID stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 46 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a1a23bceef583febf4ea0b4530553df4a}\label{esp_main_8cpp_a1a23bceef583febf4ea0b4530553df4a}} 
+\index{espMain.cpp@{espMain.cpp}!NFCENABLED@{NFCENABLED}}
+\index{NFCENABLED@{NFCENABLED}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{NFCENABLED}{NFCENABLED}}
+{\footnotesize\ttfamily \#define N\+F\+C\+E\+N\+A\+B\+L\+ED~9}
+
+
+
+Address of N\+FC enabled fla, stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 38 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_aec78e7a9e90a406a56f859ee456e8eae}\label{esp_main_8cpp_aec78e7a9e90a406a56f859ee456e8eae}} 
+\index{espMain.cpp@{espMain.cpp}!OUT@{OUT}}
+\index{OUT@{OUT}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{OUT}{OUT}}
+{\footnotesize\ttfamily \#define O\+UT~\mbox{\hyperlink{esppins_8h_a2ddd4183d444d6d128cbdbd6269e4e0c}{D5}}}
+
+
+
+Pin definition, will be pulled H\+I\+GH if access is granted. 
+
+
+
+Definition at line 54 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a39bf5834616a3adabbb1bf784ab567f0}\label{esp_main_8cpp_a39bf5834616a3adabbb1bf784ab567f0}} 
+\index{espMain.cpp@{espMain.cpp}!PASSENABLED@{PASSENABLED}}
+\index{PASSENABLED@{PASSENABLED}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{PASSENABLED}{PASSENABLED}}
+{\footnotesize\ttfamily \#define P\+A\+S\+S\+E\+N\+A\+B\+L\+ED~10}
+
+
+
+Address of password enabled flag stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 40 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a79a73bb2ba87b67c000cb44ae5cc8461}\label{esp_main_8cpp_a79a73bb2ba87b67c000cb44ae5cc8461}} 
+\index{espMain.cpp@{espMain.cpp}!PINCODE@{PINCODE}}
+\index{PINCODE@{PINCODE}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{PINCODE}{PINCODE}}
+{\footnotesize\ttfamily \#define P\+I\+N\+C\+O\+DE~12}
+
+
+
+Address of pin code value stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 44 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_ae1f79f6ad050ef88ccc89c4915c2e1a3}\label{esp_main_8cpp_ae1f79f6ad050ef88ccc89c4915c2e1a3}} 
+\index{espMain.cpp@{espMain.cpp}!SCANNERENABLED@{SCANNERENABLED}}
+\index{SCANNERENABLED@{SCANNERENABLED}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{SCANNERENABLED}{SCANNERENABLED}}
+{\footnotesize\ttfamily \#define S\+C\+A\+N\+N\+E\+R\+E\+N\+A\+B\+L\+ED~12}
+
+
+
+Address of scanner enabled flag stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 42 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_afff112f83aa99ca2339e4e808cb34bc0}\label{esp_main_8cpp_afff112f83aa99ca2339e4e808cb34bc0}} 
+\index{espMain.cpp@{espMain.cpp}!USERCARDS@{USERCARDS}}
+\index{USERCARDS@{USERCARDS}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{USERCARDS}{USERCARDS}}
+{\footnotesize\ttfamily \#define U\+S\+E\+R\+C\+A\+R\+DS~26}
+
+
+
+Address of beginning of user cards data stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 52 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a46b3161d72445324482d5768e9d440ef}\label{esp_main_8cpp_a46b3161d72445324482d5768e9d440ef}} 
+\index{espMain.cpp@{espMain.cpp}!USERCARDSCOUNT@{USERCARDSCOUNT}}
+\index{USERCARDSCOUNT@{USERCARDSCOUNT}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{USERCARDSCOUNT}{USERCARDSCOUNT}}
+{\footnotesize\ttfamily \#define U\+S\+E\+R\+C\+A\+R\+D\+S\+C\+O\+U\+NT~25}
+
+
+
+Address of count of reconized user cards stored in E\+E\+P\+R\+OM. 
+
+
+
+Definition at line 50 of file esp\+Main.\+cpp.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{esp_main_8cpp_a60ade2b254782a09199c5486752ee98d}\label{esp_main_8cpp_a60ade2b254782a09199c5486752ee98d}} 
+\index{espMain.cpp@{espMain.cpp}!accessDenied@{accessDenied}}
+\index{accessDenied@{accessDenied}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{accessDenied()}{accessDenied()}}
+{\footnotesize\ttfamily void access\+Denied (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that refuses access to protected zone when called. 
+
+
+
+Definition at line 292 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a0a50f3e2249e3243752571912b87eb97}\label{esp_main_8cpp_a0a50f3e2249e3243752571912b87eb97}} 
+\index{espMain.cpp@{espMain.cpp}!accessGranted@{accessGranted}}
+\index{accessGranted@{accessGranted}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{accessGranted()}{accessGranted()}}
+{\footnotesize\ttfamily void access\+Granted (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that grants access to protected zone when called. 
+
+
+
+Definition at line 272 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_aef8641731cb6a821e44f8ff6b362a857}\label{esp_main_8cpp_aef8641731cb6a821e44f8ff6b362a857}} 
+\index{espMain.cpp@{espMain.cpp}!addDeleteCard@{addDeleteCard}}
+\index{addDeleteCard@{addDeleteCard}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{addDeleteCard()}{addDeleteCard()}}
+{\footnotesize\ttfamily bool add\+Delete\+Card (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{a\mbox{[}4\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Tries to find given as parameter card in E\+E\+P\+R\+OM~\newline
+. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em a} & array -\/ card data -\/ to add or delete \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if card found and deleted ~\newline
+ false if card not found and added 
+\end{DoxyReturn}
+
+
+Definition at line 179 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a8de469820adb093cbd4e30c1017467e8}\label{esp_main_8cpp_a8de469820adb093cbd4e30c1017467e8}} 
+\index{espMain.cpp@{espMain.cpp}!arrcmp@{arrcmp}}
+\index{arrcmp@{arrcmp}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{arrcmp()}{arrcmp()}}
+{\footnotesize\ttfamily bool arrcmp (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{a\mbox{[}4\mbox{]},  }\item[{uint8\+\_\+t}]{b\mbox{[}4\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Compares two arrays of uint8\+\_\+t type. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em a} & first array \\
+\hline
+\mbox{\texttt{ in}}  & {\em b} & second array \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if arrays are the same 
+
+false if arrays are different 
+\end{DoxyReturn}
+
+
+Definition at line 147 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_abe175b2028d177e1d6799f3823812a36}\label{esp_main_8cpp_abe175b2028d177e1d6799f3823812a36}} 
+\index{espMain.cpp@{espMain.cpp}!auth@{auth}}
+\index{auth@{auth}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{auth()}{auth()}}
+{\footnotesize\ttfamily bool auth (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that handles user authentication via W\+WW ~\newline
+. 
+
+\begin{DoxyReturn}{Returns}
+true if specific cookie is set ~\newline
+ 
+
+false if not 
+\end{DoxyReturn}
+
+
+Definition at line 383 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a935aa29c9921acef08e3b131eb4fd5e6}\label{esp_main_8cpp_a935aa29c9921acef08e3b131eb4fd5e6}} 
+\index{espMain.cpp@{espMain.cpp}!barcodeCheck@{barcodeCheck}}
+\index{barcodeCheck@{barcodeCheck}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{barcodeCheck()}{barcodeCheck()}}
+{\footnotesize\ttfamily void barcode\+Check (\begin{DoxyParamCaption}\item[{String}]{code }\end{DoxyParamCaption})}
+
+
+
+Function that handles barcode scanner code check ~\newline
+ Grants or denies access to protected zone regarding to \mbox{\hyperlink{esp_main_8cpp_a8de469820adb093cbd4e30c1017467e8}{arrcmp()}} return value. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em code} & String in format aa\+:bb\+:cc\+:dd where aa,bb,cc,dd in range of 00-\/FF \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 665 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_ac6b9dd166f68695ebf79df00dc7621a2}\label{esp_main_8cpp_ac6b9dd166f68695ebf79df00dc7621a2}} 
+\index{espMain.cpp@{espMain.cpp}!blk@{blk}}
+\index{blk@{blk}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{blk()}{blk()}}
+{\footnotesize\ttfamily void blk (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Switches display background for short period of time. 
+
+
+
+Definition at line 131 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a8d32936782148258b6ead0b4f659696e}\label{esp_main_8cpp_a8d32936782148258b6ead0b4f659696e}} 
+\index{espMain.cpp@{espMain.cpp}!bs@{bs}}
+\index{bs@{bs}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{bs()}{bs()}}
+{\footnotesize\ttfamily Software\+Serial bs (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{esppins_8h_a2ba78f059a7ebebc95e7beef690e88d6}{D7}}}]{,  }\item[{50}]{ }\end{DoxyParamCaption})}
+
+
+
+Instance of Software\+Serial class, used for keyboard communication. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em D7} & Receive pin \\
+\hline
+\mbox{\texttt{ in}}  & {\em 50} & Transmit pin (not used) \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{esp_main_8cpp_a045cd6579bf9a26fe79a930a8bc1ba0d}\label{esp_main_8cpp_a045cd6579bf9a26fe79a930a8bc1ba0d}} 
+\index{espMain.cpp@{espMain.cpp}!changeLockTime@{changeLockTime}}
+\index{changeLockTime@{changeLockTime}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{changeLockTime()}{changeLockTime()}}
+{\footnotesize\ttfamily void change\+Lock\+Time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that changes lock time(in minutes), works only if user is admin. 
+
+
+
+Definition at line 447 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a002b81f5218fb07fc2683986508b6a5c}\label{esp_main_8cpp_a002b81f5218fb07fc2683986508b6a5c}} 
+\index{espMain.cpp@{espMain.cpp}!changePass@{changePass}}
+\index{changePass@{changePass}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{changePass()}{changePass()}}
+{\footnotesize\ttfamily void change\+Pass (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that handles admin password change for administrator panel via W\+WW, works only if user is admin. 
+
+
+
+Definition at line 405 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_ab4307affbe0bbfb62bc80dd2ad91f489}\label{esp_main_8cpp_ab4307affbe0bbfb62bc80dd2ad91f489}} 
+\index{espMain.cpp@{espMain.cpp}!changePin@{changePin}}
+\index{changePin@{changePin}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{changePin()}{changePin()}}
+{\footnotesize\ttfamily void change\+Pin (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that changes access pin code, works only if user is admin ~\newline
+ 
+
+
+
+Definition at line 426 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a37aefd83c7026936272e56f60431543e}\label{esp_main_8cpp_a37aefd83c7026936272e56f60431543e}} 
+\index{espMain.cpp@{espMain.cpp}!checkPass@{checkPass}}
+\index{checkPass@{checkPass}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{checkPass()}{checkPass()}}
+{\footnotesize\ttfamily bool check\+Pass (\begin{DoxyParamCaption}\item[{String}]{pass }\end{DoxyParamCaption})}
+
+
+
+Checks if given given password is correct~\newline
+. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em pass} & Password to be checked \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if is valid 
+
+false if is not valid 
+\end{DoxyReturn}
+
+
+Definition at line 253 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_abd4e5c937c4b98dd42745acb33815cdf}\label{esp_main_8cpp_abd4e5c937c4b98dd42745acb33815cdf}} 
+\index{espMain.cpp@{espMain.cpp}!clearData@{clearData}}
+\index{clearData@{clearData}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{clearData()}{clearData()}}
+{\footnotesize\ttfamily void clear\+Data (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Performs E\+E\+P\+R\+OM clear and fill with default values. 
+
+
+
+Definition at line 157 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a13120ea5788aaacf44a89b193a0cceef}\label{esp_main_8cpp_a13120ea5788aaacf44a89b193a0cceef}} 
+\index{espMain.cpp@{espMain.cpp}!del@{del}}
+\index{del@{del}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{del()}{del()}}
+{\footnotesize\ttfamily void del (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that delete card from storage if card is present, works only if user is admin. 
+
+
+
+Definition at line 516 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a42485aec8674a8641acef7bf90c6791c}\label{esp_main_8cpp_a42485aec8674a8641acef7bf90c6791c}} 
+\index{espMain.cpp@{espMain.cpp}!dumpCards@{dumpCards}}
+\index{dumpCards@{dumpCards}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{dumpCards()}{dumpCards()}}
+{\footnotesize\ttfamily void dump\+Cards (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that dumps all saved cards to Serial port. 
+
+
+
+Definition at line 502 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_ace53b0ca7082fc33a480c32996449ccb}\label{esp_main_8cpp_ace53b0ca7082fc33a480c32996449ccb}} 
+\index{espMain.cpp@{espMain.cpp}!findCard@{findCard}}
+\index{findCard@{findCard}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{findCard()}{findCard()}}
+{\footnotesize\ttfamily bool find\+Card (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{a\mbox{[}4\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Checks if scanned card is known~\newline
+. 
+
+\begin{DoxyReturn}{Returns}
+true if known~\newline
+ 
+
+false if not 
+\end{DoxyReturn}
+
+
+Definition at line 228 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a861e3823eb1f21ac46bf46cb52b63f21}\label{esp_main_8cpp_a861e3823eb1f21ac46bf46cb52b63f21}} 
+\index{espMain.cpp@{espMain.cpp}!firstRunConfig@{firstRunConfig}}
+\index{firstRunConfig@{firstRunConfig}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{firstRunConfig()}{firstRunConfig()}}
+{\footnotesize\ttfamily void first\+Run\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that provides {\ttfamily first run config} for owner / administrator ~\newline
+ Triggered by hardware button. 
+
+
+
+Definition at line 318 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_afae9461fefb7a9040ae40721723a63af}\label{esp_main_8cpp_afae9461fefb7a9040ae40721723a63af}} 
+\index{espMain.cpp@{espMain.cpp}!h2i@{h2i}}
+\index{h2i@{h2i}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{h2i()}{h2i()}}
+{\footnotesize\ttfamily String h2i (\begin{DoxyParamCaption}\item[{String}]{d }\end{DoxyParamCaption})}
+
+
+
+Function that converts string in H\+EX format~\newline
+ for example\+: AC\+:3D\+:\+FF\+:A0 to its D\+EC format~\newline
+ like\+: 172\+:61\+:255\+:160. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em d} & valid H\+EX string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+integer representation of H\+EX values in string 
+\end{DoxyReturn}
+
+
+Definition at line 649 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a54f2b176a577c7a89bb94da4f12cd06b}\label{esp_main_8cpp_a54f2b176a577c7a89bb94da4f12cd06b}} 
+\index{espMain.cpp@{espMain.cpp}!handleNotFound@{handleNotFound}}
+\index{handleNotFound@{handleNotFound}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{handleNotFound()}{handleNotFound()}}
+{\footnotesize\ttfamily void handle\+Not\+Found (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that handles 404 error on server, applies when someone want to acces file (or path) that is not found. 
+
+
+
+Definition at line 396 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a8427468f39342a1990703e9f5ce7fd29}\label{esp_main_8cpp_a8427468f39342a1990703e9f5ce7fd29}} 
+\index{espMain.cpp@{espMain.cpp}!handleRoot@{handleRoot}}
+\index{handleRoot@{handleRoot}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{handleRoot()}{handleRoot()}}
+{\footnotesize\ttfamily void handle\+Root (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that handles main index file via W\+WW, prompts for password, if correct will redirect to admin panel ~\newline
+ 
+
+
+
+Definition at line 473 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_ae084e1bc8ccb35ea289ba0ca4972ea6d}\label{esp_main_8cpp_ae084e1bc8ccb35ea289ba0ca4972ea6d}} 
+\index{espMain.cpp@{espMain.cpp}!lcd@{lcd}}
+\index{lcd@{lcd}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{lcd()}{lcd()}}
+{\footnotesize\ttfamily Liquid\+Crystal\+\_\+\+I2C lcd (\begin{DoxyParamCaption}\item[{0x27}]{,  }\item[{16}]{,  }\item[{2}]{ }\end{DoxyParamCaption})}
+
+
+
+Instance of L\+CD class, used to drive L\+CD display. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em 0x27} & Address of L\+CD in I2C bus \\
+\hline
+\mbox{\texttt{ in}}  & {\em 16} & Number of columns \\
+\hline
+\mbox{\texttt{ in}}  & {\em 2} & number of lines \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{esp_main_8cpp_af76b7b46958dabf5e4ee9a492f0ec3fa}\label{esp_main_8cpp_af76b7b46958dabf5e4ee9a492f0ec3fa}} 
+\index{espMain.cpp@{espMain.cpp}!login@{login}}
+\index{login@{login}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{login()}{login()}}
+{\footnotesize\ttfamily void login (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that handles admin panel login~\newline
+ Redirects to admin panel if login was successful. 
+
+
+
+Definition at line 568 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_afe461d27b9c48d5921c00d521181f12f}\label{esp_main_8cpp_afe461d27b9c48d5921c00d521181f12f}} 
+\index{espMain.cpp@{espMain.cpp}!loop@{loop}}
+\index{loop@{loop}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{loop()}{loop()}}
+{\footnotesize\ttfamily void loop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Main loop function~\newline
+ Provides control for R\+F\+ID reader ~\newline
+ password entry, admin access and others. 
+
+
+
+Definition at line 779 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a3f9c6f905d1dcd952bff709aeac33026}\label{esp_main_8cpp_a3f9c6f905d1dcd952bff709aeac33026}} 
+\index{espMain.cpp@{espMain.cpp}!nfc@{nfc}}
+\index{nfc@{nfc}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{nfc()}{nfc()}}
+{\footnotesize\ttfamily Adafruit\+\_\+\+P\+N532 nfc (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{esppins_8h_a9711ce54c7a380964a5b4dbac7da12e2}{D8}}}]{,  }\item[{\mbox{\hyperlink{esppins_8h_a79a18a7f5ccf7a7ca31f302bd62527a6}{D6}}}]{ }\end{DoxyParamCaption})}
+
+
+
+Instance of Adafruit\+\_\+\+P\+N532 class, used for driving R\+F\+ID module. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em D8} & RQ pin \\
+\hline
+\mbox{\texttt{ in}}  & {\em D6} & R\+ST pin \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{esp_main_8cpp_a58141c4f251beaa1fee89b632d87152f}\label{esp_main_8cpp_a58141c4f251beaa1fee89b632d87152f}} 
+\index{espMain.cpp@{espMain.cpp}!server@{server}}
+\index{server@{server}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{server()}{server()}}
+{\footnotesize\ttfamily E\+S\+P8266\+Web\+Server server (\begin{DoxyParamCaption}\item[{80}]{ }\end{DoxyParamCaption})}
+
+
+
+Instance of E\+S\+P8266\+Web\+Server class, used for administrator panel. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em 80} & Port for webserver \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Return description 
+\end{DoxyReturn}
+\mbox{\Hypertarget{esp_main_8cpp_a4fc01d736fe50cf5b977f755b675f11d}\label{esp_main_8cpp_a4fc01d736fe50cf5b977f755b675f11d}} 
+\index{espMain.cpp@{espMain.cpp}!setup@{setup}}
+\index{setup@{setup}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{setup()}{setup()}}
+{\footnotesize\ttfamily void setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Main setup function~\newline
+ Sets parameters for class objects, connects to Wi-\/\+Fi~\newline
+ Reads data from E\+E\+P\+R\+OM to R\+AM. 
+
+
+
+Definition at line 698 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a2b2b4794d662937937667bfe4b73fbd9}\label{esp_main_8cpp_a2b2b4794d662937937667bfe4b73fbd9}} 
+\index{espMain.cpp@{espMain.cpp}!toggleNFC@{toggleNFC}}
+\index{toggleNFC@{toggleNFC}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{toggleNFC()}{toggleNFC()}}
+{\footnotesize\ttfamily void toggle\+N\+FC (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that toggles N\+FC from http request, works only if user is admin. 
+
+
+
+Definition at line 601 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_aa16e0df179df0f736e6adaaf59e50a2f}\label{esp_main_8cpp_aa16e0df179df0f736e6adaaf59e50a2f}} 
+\index{espMain.cpp@{espMain.cpp}!togglePIN@{togglePIN}}
+\index{togglePIN@{togglePIN}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{togglePIN()}{togglePIN()}}
+{\footnotesize\ttfamily void toggle\+P\+IN (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function that toggles pin code from http request, works only if user is admin. 
+
+
+
+Definition at line 615 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a0b383934d7a19716d80cdbc9cef1d939}\label{esp_main_8cpp_a0b383934d7a19716d80cdbc9cef1d939}} 
+\index{espMain.cpp@{espMain.cpp}!toggleScanner@{toggleScanner}}
+\index{toggleScanner@{toggleScanner}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{toggleScanner()}{toggleScanner()}}
+{\footnotesize\ttfamily void toggle\+Scanner (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Funciton that toggles scanner from http request, works only if user is admin. 
+
+
+
+Definition at line 629 of file esp\+Main.\+cpp.
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{esp_main_8cpp_ac3f465af0f3796a4ed8db4d37d78dc82}\label{esp_main_8cpp_ac3f465af0f3796a4ed8db4d37d78dc82}} 
+\index{espMain.cpp@{espMain.cpp}!barcode@{barcode}}
+\index{barcode@{barcode}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{barcode}{barcode}}
+{\footnotesize\ttfamily String barcode = \char`\"{}\char`\"{}}
+
+
+
+Barcode holder -\/ used when new barcode was readed. 
+
+
+
+Definition at line 125 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_adc08ed1554f35803d229aeaf11216b3f}\label{esp_main_8cpp_adc08ed1554f35803d229aeaf11216b3f}} 
+\index{espMain.cpp@{espMain.cpp}!c@{c}}
+\index{c@{c}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{c}{c}}
+{\footnotesize\ttfamily char c}
+
+
+
+Incoming character holder. 
+
+
+
+Definition at line 123 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a68b7079790a59184d8dad88a7b785d1d}\label{esp_main_8cpp_a68b7079790a59184d8dad88a7b785d1d}} 
+\index{espMain.cpp@{espMain.cpp}!cfg@{cfg}}
+\index{cfg@{cfg}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{cfg}{cfg}}
+{\footnotesize\ttfamily bool cfg\mbox{[}3\mbox{]}}
+
+
+
+Feature flags, each one is for N\+FC, password and barcode scanner respectively. 
+
+
+
+Definition at line 100 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a44c5e0b2c9685d0004d76cd89b851b21}\label{esp_main_8cpp_a44c5e0b2c9685d0004d76cd89b851b21}} 
+\index{espMain.cpp@{espMain.cpp}!curMilis@{curMilis}}
+\index{curMilis@{curMilis}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{curMilis}{curMilis}}
+{\footnotesize\ttfamily unsigned long cur\+Milis}
+
+
+
+Variable for timing. 
+
+
+
+Definition at line 113 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_ae6d77325c24fc3cc936e5b158fc728a8}\label{esp_main_8cpp_ae6d77325c24fc3cc936e5b158fc728a8}} 
+\index{espMain.cpp@{espMain.cpp}!locktime@{locktime}}
+\index{locktime@{locktime}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{locktime}{locktime}}
+{\footnotesize\ttfamily int locktime = 5}
+
+
+
+Current lock time (in minutes) 
+
+
+
+Definition at line 97 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a4f9000ade72a94e56e8754c80e3277e4}\label{esp_main_8cpp_a4f9000ade72a94e56e8754c80e3277e4}} 
+\index{espMain.cpp@{espMain.cpp}!MasterAccess@{MasterAccess}}
+\index{MasterAccess@{MasterAccess}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{MasterAccess}{MasterAccess}}
+{\footnotesize\ttfamily bool Master\+Access = false}
+
+
+
+Flag for master access, filps when master card was readed. 
+
+
+
+Definition at line 102 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_adb056f61dd84394f3fbce0ae57e3a9f8}\label{esp_main_8cpp_adb056f61dd84394f3fbce0ae57e3a9f8}} 
+\index{espMain.cpp@{espMain.cpp}!MasterID@{MasterID}}
+\index{MasterID@{MasterID}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{MasterID}{MasterID}}
+{\footnotesize\ttfamily uint8\+\_\+t Master\+ID\mbox{[}4\mbox{]}}
+
+
+
+Master card ID -\/ to prevent future reads from E\+E\+P\+R\+OM to save some time and power. 
+
+
+
+Definition at line 105 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_acbd76b816d055b7a642c219fd9751020}\label{esp_main_8cpp_acbd76b816d055b7a642c219fd9751020}} 
+\index{espMain.cpp@{espMain.cpp}!password@{password}}
+\index{password@{password}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{password}{password}}
+{\footnotesize\ttfamily String password = \char`\"{}\char`\"{}}
+
+
+
+Password holder. 
+
+
+
+Definition at line 121 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a200e606a81c42adc2761ce417ec683be}\label{esp_main_8cpp_a200e606a81c42adc2761ce417ec683be}} 
+\index{espMain.cpp@{espMain.cpp}!retryTimer@{retryTimer}}
+\index{retryTimer@{retryTimer}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{retryTimer}{retryTimer}}
+{\footnotesize\ttfamily unsigned long retry\+Timer}
+
+
+
+Variable for timing. 
+
+
+
+Definition at line 111 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a27c4560b1c293b674da26db67188d836}\label{esp_main_8cpp_a27c4560b1c293b674da26db67188d836}} 
+\index{espMain.cpp@{espMain.cpp}!retryTimerSeconds@{retryTimerSeconds}}
+\index{retryTimerSeconds@{retryTimerSeconds}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{retryTimerSeconds}{retryTimerSeconds}}
+{\footnotesize\ttfamily int retry\+Timer\+Seconds = 0}
+
+
+
+Counter that count how many seconds pass when lock triggered. 
+
+
+
+Definition at line 115 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a57839e9b66863b4b735047218e335bb4}\label{esp_main_8cpp_a57839e9b66863b4b735047218e335bb4}} 
+\index{espMain.cpp@{espMain.cpp}!t2@{t2}}
+\index{t2@{t2}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{t2}{t2}}
+{\footnotesize\ttfamily unsigned long t2}
+
+
+
+Counter for card scanner. 
+
+
+
+Definition at line 108 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a5522305c1de4f07a6c6feb7275863f8f}\label{esp_main_8cpp_a5522305c1de4f07a6c6feb7275863f8f}} 
+\index{espMain.cpp@{espMain.cpp}!tries@{tries}}
+\index{tries@{tries}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{tries}{tries}}
+{\footnotesize\ttfamily uint8\+\_\+t tries = 0}
+
+
+
+Counter for tries, if entered data is incorrect, it will increment by 1. 
+
+
+
+Definition at line 95 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_a532ddf10106a8db0dcc3356428fcf4d2}\label{esp_main_8cpp_a532ddf10106a8db0dcc3356428fcf4d2}} 
+\index{espMain.cpp@{espMain.cpp}!uid@{uid}}
+\index{uid@{uid}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{uid}{uid}}
+{\footnotesize\ttfamily uint8\+\_\+t uid\mbox{[}4\mbox{]}}
+
+
+
+Card data -\/ used when new card is present and scanned. 
+
+
+
+Definition at line 119 of file esp\+Main.\+cpp.
+
+\mbox{\Hypertarget{esp_main_8cpp_aed2a08e1fa3bcb2dd04d19553a1df51c}\label{esp_main_8cpp_aed2a08e1fa3bcb2dd04d19553a1df51c}} 
+\index{espMain.cpp@{espMain.cpp}!uidLen@{uidLen}}
+\index{uidLen@{uidLen}!espMain.cpp@{espMain.cpp}}
+\doxysubsubsection{\texorpdfstring{uidLen}{uidLen}}
+{\footnotesize\ttfamily uint8\+\_\+t uid\+Len}
+
+
+
+Definition at line 119 of file esp\+Main.\+cpp.
+

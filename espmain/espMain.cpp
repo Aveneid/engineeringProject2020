@@ -27,57 +27,106 @@
   +--------------------------+---------------+
  **/
 
-#define FIRSTRUN 0
-#define ADMINPASS 1
-#define NFCENABLED 9
-#define PASSENABLED 10
-#define SCANNERENABLED 12
-#define PINCODE 12
-#define MASTERCARDID 20
-#define LOCKTIME 24
-#define USERCARDSCOUNT 25
-#define USERCARDS 26
 
+
+///Address of first run flag stored in EEPROM
+#define FIRSTRUN 0
+///Address of admin password address stored in EEPROM
+#define ADMINPASS 1
+///Address of NFC enabled fla, stored in EEPROM
+#define NFCENABLED 9
+///Address of password enabled flag stored in EEPROM
+#define PASSENABLED 10
+///Address of scanner enabled flag stored in EEPROM
+#define SCANNERENABLED 12
+///Address of pin code value stored in EEPROM
+#define PINCODE 12
+///Address of Master card ID stored in EEPROM
+#define MASTERCARDID 20
+///Address of lock time in minutes stored in EEPROM
+#define LOCKTIME 24
+///Address of count of reconized user cards stored in EEPROM
+#define USERCARDSCOUNT 25
+///Address of beginning of user cards data stored in EEPROM
+#define USERCARDS 26
+///Pin definition, will be pulled HIGH if access is granted
 #define OUT D5
+///Size of card in bytes
 #define CARDSIZE 4
-//create object for LCD class
+
+/**
+	*  \brief Instance of LCD class, used to drive LCD display
+ *  
+ *  \param [in] 0x27 Address of LCD in I2C bus
+ *  \param [in] 16 Number of columns
+ *  \param [in] 2 number of lines
+ */
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-//enable server on port 80
+/**
+	*  \brief Instance of ESP8266WebServer class, used for administrator panel
+ *  
+ *  \param [in] 80 Port for webserver
+ *  \return Return description
+ *  
+ *  
+ */
 ESP8266WebServer server(80);
-// RX, TX
+/**
+	*  \brief Instance of SoftwareSerial class, used for keyboard communication
+ *  
+ *  \param [in] D7 Receive pin
+ *  \param [in] 50 Transmit pin (not used)
+ */
+ 
 SoftwareSerial bs(D7, 50);
-//rq rst
+/**
+	*  \brief Instance of Adafruit_PN532 class, used for driving RFID module
+ *  
+ *  \param [in] D8 RQ pin
+ *  \param [in] D6 RST pin
+
+ */
 Adafruit_PN532 nfc(D8, D6);
 
 
 
 
-//MAIN VARIABLES
+///Counter for tries, if entered data is incorrect, it will increment by 1
 uint8_t tries = 0;
+///Current lock time (in minutes)
 int locktime = 5;
-// disable pin, disable nfc, disable scanner
+
+///Feature flags, each one is for NFC, password and barcode scanner respectively
 bool cfg[3];
-//master access flag
+///Flag for master access, filps when master card was readed
 bool MasterAccess = false;
-//master card ID - to prevent future reads from eeprom to save some time and power
+
+///Master card ID - to prevent future reads from EEPROM to save some time and power
 uint8_t MasterID[4];
-//counter for card scanner
+
+///Counter for card scanner
 unsigned long t2;
 
+///Variable for timing
 unsigned long retryTimer;
+///Variable for timing
 unsigned long curMilis;
+///Counter that count how many seconds pass when lock triggered
 int retryTimerSeconds = 0;
-//card data
+
+
+///Card data - used when new card is present and scanned
 uint8_t uid[4], uidLen;
-//password holder
+///Password holder
 String password = "";
-//incoming character holder
+///Incoming character holder
 char c;
+///Barcode holder - used when new barcode was readed
 String barcode = "";
 
 
 /**
-    switches display background for short period of time
+   \brief  Switches display background for short period of time
 **/
 void blk() {
   lcd.noBacklight();
@@ -85,36 +134,25 @@ void blk() {
   lcd.backlight();
   delay(100);
 }
+
+
 /**
-  compare two arrays - type uint8_t - check cards ids
-  returns: 1 if arrays are the same
-       0 if not
-**/
+	*  \brief  Compares two arrays of uint8_t type
+ *  \param [in] a first array
+ *  \param [in] b second array
+ *  \return true if arrays are the same
+ *  \return false if arrays are different
+ *  
+ */
 bool arrcmp(uint8_t a[4], uint8_t b[4]) {
   for (int i = 0; i < 4; i++)
     if (a[i] != b[i])
       return false;
   return true;
 }
-String getValue(String data, char separator, int index)
-{
-  int found = 0;
-  int strIndex[] = {0, -1};
-  int maxIndex = data.length() - 1;
-
-  for (int i = 0; i <= maxIndex && found <= index; i++) {
-    if (data.charAt(i) == separator || i == maxIndex) {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
-    }
-  }
-
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
 
 /**
-    performs EEPROM clear and fill with default values
+    \brief Performs EEPROM clear and fill with default values
 **/
 void clearData() {
   lcd.clear();
@@ -133,9 +171,10 @@ void clearData() {
   lcd.clear();
 }
 /**
-  tries to find scanned card in memory
-  returns: 1 if card found and deleted
-       0 if card not found and added
+  \brief Tries to find given as parameter card in EEPROM\n 
+  \param a array - card data - to add or delete
+  \returns  true if card found and deleted \n 
+       false if card not found and added
 **/
 bool addDeleteCard(uint8_t a[4]) {
 
@@ -179,10 +218,13 @@ bool addDeleteCard(uint8_t a[4]) {
   return false;
 }
 
-/**  checks if scanned card is known
-  returns: 1 if yes
-       0 if not
-**/
+/**
+*  \brief Checks if scanned card is known\n 
+ *  
+ *  \return true if known\n
+ *  \return false if not
+ *  
+ */
 bool findCard(uint8_t a[4]) {
 
   uidLen = 0;
@@ -200,11 +242,14 @@ bool findCard(uint8_t a[4]) {
   return false;
 
 }
+
 /**
-    checks if given given password is correct
-    returns: 1 if yes
-         0 if no
-**/
+	  \brief Checks if given given password is correct\n 
+ *  
+ *  \param [in] pass Password to be checked
+ *  \return true if is valid
+ *  \return false if is not valid
+ */
 bool checkPass(String pass) {
   String mainPass;
   for (int i = 0; i < 8; i++) {
@@ -222,7 +267,7 @@ bool checkPass(String pass) {
 }
 
 /**
-    main function that grants access
+    \brief Function that grants access to protected zone when called
 **/
 void accessGranted() {
   lcd.clear();
@@ -242,7 +287,7 @@ void accessGranted() {
 
 }
 /**
-    main function that refuses access
+   \brief  Function that refuses access  to protected zone when called
 **/
 void accessDenied() {
   lcd.clear();
@@ -266,7 +311,8 @@ void accessDenied() {
   lcd.setCursor(0, 1);
 }
 /**
-*    function that provides `first run config` for owner / administrator
+   \brief  Function that provides `first run config` for owner / administrator \n 
+	Triggered by hardware button
 **/
 
 void firstRunConfig() {
@@ -330,9 +376,9 @@ void firstRunConfig() {
   lcd.clear();
 }
 /**
-*
-*    function that handle user authentication via WWW 
-*
+    \brief Function that handles user authentication via WWW \n 
+	\returns true if specific cookie is set \n
+	 \returns false if not
 **/
 bool auth() {
 
@@ -345,9 +391,7 @@ bool auth() {
   return false;
 }
 /**
- * 
- * function that handles 404 error on server, applies when someone want to acces file (or path) that is not found
- * 
+  \brief Function that handles 404 error on server, applies when someone want to acces file (or path) that is not found
  */
 void handleNotFound() {
 
@@ -355,11 +399,9 @@ void handleNotFound() {
   server.send(404, "text/plain", msg);
 }
 
-/*
- * 
- * function that handles admin password change for administrator panel via WWW, works only if user is admin
- * 
- */
+/**
+  \brief Function that handles admin password change for administrator panel via WWW, works only if user is admin
+ **/
 void changePass() {
   if (!auth) {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
@@ -378,11 +420,9 @@ void changePass() {
   }
   server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
 }
-/*
- * 
- * function that changes access pincode, works only if user is admin
- * 
- */
+/**
+  \brief Function that changes access pin code, works only if user is admin  
+ **/
 void changePin() {
   if (!auth) {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
@@ -401,10 +441,9 @@ void changePin() {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
   }
 }
-/*
- * 
- * function that changes lock time(in minutes), works only if user is admin
- */
+/**
+	\brief Function that changes lock time(in minutes), works only if user is admin
+ **/
 void changeLockTime() {
   if (!auth) {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
@@ -429,11 +468,8 @@ void changeLockTime() {
   }
 }
 /**
- * 
- * function that handles main index file via WWW, prompts for password, if correct will redirect to admin panel
- * 
- * 
- */
+  \brief Function that handles main index file via WWW, prompts for password, if correct will redirect to admin panel  
+ **/
 void handleRoot() {
   String h = "";
   if (!auth()) {
@@ -460,11 +496,9 @@ void handleRoot() {
   server.sendContent(indexHTML6);
   server.send(200);
 }
-/*
- * 
- * function that dumps all saved cards to Serial port
- * 
- */
+/**
+  \brief Function that dumps all saved cards to Serial port
+ **/
 void dumpCards() {
   int cardsCount = EEPROM.read(USERCARDSCOUNT);
   Serial.print(cardsCount);
@@ -476,11 +510,9 @@ void dumpCards() {
     }
   }
 }
-/*
- * 
- * function that delete card from storage if card is present, works only if user is admin
- * 
- */
+/**
+  \brief Function that delete card from storage if card is present, works only if user is admin
+ **/
 void del() {
   if (auth()) {
     if (server.hasArg("ID")) {
@@ -529,11 +561,10 @@ void del() {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
   }
 }
-/*
- * 
- * function that handles admin panel login
- * 
- */
+/** 
+  \brief Function that handles admin panel login\n 
+  Redirects to admin panel if login was successful
+ **/
 void login() {
   String hd = "";
   if (server.hasArg("LOGOUT")) {
@@ -564,11 +595,9 @@ void login() {
     server.send(200, "text/html", "<html><body><form>Password: <input type='password' name='PASS'><input type='submit'></form></body></html>");
 
 }
-/*
- * 
- * function that toggles NFC, works only if user is admin
- * 
- */
+/**
+  \brief Function that toggles NFC from http request, works only if user is admin 
+ **/
 void toggleNFC() {
   if (auth()) {
     cfg[0] = !cfg[0];
@@ -580,11 +609,9 @@ void toggleNFC() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
-/*
- * 
- * function that toggles pin code, works only if user is admin
- * 
- */
+/**
+  \brief Function that toggles pin code from http request, works only if user is admin 
+ **/
 void togglePIN() {
   if (auth()) {
     cfg[1] = !cfg[1];
@@ -596,11 +623,9 @@ void togglePIN() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
-/*
- * 
- * funciton that toggles scanner, works only if user is admin
- * 
- */
+/** 
+  \brief Funciton that toggles scanner from http request, works only if user is admin
+ **/
 void toggleScanner() {
   if (auth()) {
     cfg[2] = !cfg[2];
@@ -612,12 +637,14 @@ void toggleScanner() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
+
 /**
- * 
- * function that converts string in HEX format
- * for example: AC:3D:FF:A0 to its DEC format
- * like: 172:61:255:160
- * 
+*  \brief Function that converts string in HEX format\n 
+  for example: AC:3D:FF:A0 to its DEC format\n 
+  like: 172:61:255:160 
+ *  
+ *  \param [in] d valid HEX string
+ *  \return integer representation of HEX values in string
  */
 String h2i(String d) {
   String r = "";
@@ -629,11 +656,11 @@ String h2i(String d) {
   return r;
 }
 
-/*
- * 
- * function that handles barcode scanner code check
- * grants or denies access to protected zone 
- * 
+/**
+ *  \brief  Function that handles barcode scanner code check \n 
+ *  Grants or denies access to protected zone regarding to arrcmp() return value
+ *  
+ *  \param [in] code String in format aa:bb:cc:dd where aa,bb,cc,dd in range of 00-FF
  */
 void barcodeCheck(String code) {
   if (code.length() > 0) {
@@ -664,7 +691,9 @@ void barcodeCheck(String code) {
 
 
 /**
-*    main setup function
+*   \brief  Main setup function\n 
+*	Sets parameters for class objects, connects to Wi-Fi\n 
+*	Reads data from EEPROM to RAM
 **/
 void setup() {
   //serial for barcode scanner
@@ -743,8 +772,9 @@ void setup() {
   Serial.flush();
 }
 /**
-*    main loop function
-*   provides control for RFID reader, password entry, admin access and others
+   \brief Main loop function\n 
+   Provides control for RFID reader \n 
+   password entry, admin access and others
 **/
 void loop() {
 

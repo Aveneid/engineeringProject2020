@@ -1,0 +1,207 @@
+\hypertarget{keyboard__listener_8cpp}{}\doxysection{keyboard\+\_\+listener/keyboard\+\_\+listener.cpp File Reference}
+\label{keyboard__listener_8cpp}\index{keyboard\_listener/keyboard\_listener.cpp@{keyboard\_listener/keyboard\_listener.cpp}}
+{\ttfamily \#include $<$Software\+Serial.\+h$>$}\newline
+{\ttfamily \#include $<$P\+S2\+Keyboard.\+h$>$}\newline
+{\ttfamily \#include $<$Keypad.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}{R\+O\+WS}}~4
+\begin{DoxyCompactList}\small\item\em Number of rows in keypad. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}{C\+O\+LS}}~5
+\begin{DoxyCompactList}\small\item\em Number of columns in keypad. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+Software\+Serial \mbox{\hyperlink{keyboard__listener_8cpp_a3c7a6b0cc41d4aaa276f30a5cf89b8f0}{bs}} (50, 4)
+\begin{DoxyCompactList}\small\item\em Create instance of Software\+Serial class, RX on pin 50 (unused), TX on 4 pin. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{keyboard__listener_8cpp_a4fc01d736fe50cf5b977f755b675f11d}{setup}} ()
+\item 
+void \mbox{\hyperlink{keyboard__listener_8cpp_afe461d27b9c48d5921c00d521181f12f}{loop}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+char \mbox{\hyperlink{keyboard__listener_8cpp_a856e873a1d14012d57ddb813c4a1e40a}{keys}} \mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}{R\+O\+WS}}\mbox{]}\mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}{C\+O\+LS}}\mbox{]}
+\begin{DoxyCompactList}\small\item\em Keypad layout. \end{DoxyCompactList}\item 
+byte \mbox{\hyperlink{keyboard__listener_8cpp_a6d6753e0ae098b31e2f84d4024e361cf}{row\+Pins}} \mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}{R\+O\+WS}}\mbox{]} = \{A0, A1, A2, A3\}
+\begin{DoxyCompactList}\small\item\em Pin map for rows for keypad. \end{DoxyCompactList}\item 
+byte \mbox{\hyperlink{keyboard__listener_8cpp_aa9fece7b062124080e4b2976f9a8b675}{col\+Pins}} \mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}{C\+O\+LS}}\mbox{]} = \{12, 11, 10, 9, 8\}
+\begin{DoxyCompactList}\small\item\em Pin map for columns for keypad. \end{DoxyCompactList}\item 
+Keypad \mbox{\hyperlink{keyboard__listener_8cpp_a0e6c3cc7e8c762ab0ca1fa2296d7bbfe}{keypad}} = Keypad( make\+Keymap(\mbox{\hyperlink{keyboard__listener_8cpp_a856e873a1d14012d57ddb813c4a1e40a}{keys}}), \mbox{\hyperlink{keyboard__listener_8cpp_a6d6753e0ae098b31e2f84d4024e361cf}{row\+Pins}}, \mbox{\hyperlink{keyboard__listener_8cpp_aa9fece7b062124080e4b2976f9a8b675}{col\+Pins}}, \mbox{\hyperlink{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}{R\+O\+WS}}, \mbox{\hyperlink{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}{C\+O\+LS}})
+\begin{DoxyCompactList}\small\item\em Create keypad instance. \end{DoxyCompactList}\item 
+P\+S2\+Keyboard \mbox{\hyperlink{keyboard__listener_8cpp_a4d45508aaea1af22f73cbd9fa5525f33}{keyboard}}
+\begin{DoxyCompactList}\small\item\em Create instance of P\+S2\+Keyboard class. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{keyboard__listener_8cpp_a60449ab6e3cc483a69bbe369ea9f5aa7}{cn}} = 0
+\begin{DoxyCompactList}\small\item\em Counter for \char`\"{}\+:\char`\"{}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}\label{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!COLS@{COLS}}
+\index{COLS@{COLS}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{COLS}{COLS}}
+{\footnotesize\ttfamily \#define C\+O\+LS~5}
+
+
+
+Number of columns in keypad. 
+
+
+
+Definition at line 8 of file keyboard\+\_\+listener.\+cpp.
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}\label{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!ROWS@{ROWS}}
+\index{ROWS@{ROWS}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{ROWS}{ROWS}}
+{\footnotesize\ttfamily \#define R\+O\+WS~4}
+
+
+
+Number of rows in keypad. 
+
+
+
+Definition at line 6 of file keyboard\+\_\+listener.\+cpp.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{keyboard__listener_8cpp_a3c7a6b0cc41d4aaa276f30a5cf89b8f0}\label{keyboard__listener_8cpp_a3c7a6b0cc41d4aaa276f30a5cf89b8f0}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!bs@{bs}}
+\index{bs@{bs}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{bs()}{bs()}}
+{\footnotesize\ttfamily Software\+Serial bs (\begin{DoxyParamCaption}\item[{50}]{,  }\item[{4}]{ }\end{DoxyParamCaption})}
+
+
+
+Create instance of Software\+Serial class, RX on pin 50 (unused), TX on 4 pin. 
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_afe461d27b9c48d5921c00d521181f12f}\label{keyboard__listener_8cpp_afe461d27b9c48d5921c00d521181f12f}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!loop@{loop}}
+\index{loop@{loop}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{loop()}{loop()}}
+{\footnotesize\ttfamily void loop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Check if scanner is available
+
+get character from scanner
+
+get key from Keypad
+
+wait some time
+
+Definition at line 38 of file keyboard\+\_\+listener.\+cpp.
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_a4fc01d736fe50cf5b977f755b675f11d}\label{keyboard__listener_8cpp_a4fc01d736fe50cf5b977f755b675f11d}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!setup@{setup}}
+\index{setup@{setup}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{setup()}{setup()}}
+{\footnotesize\ttfamily void setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+start Software\+Serial for keyboard
+
+start Serial for barcode scanner
+
+start P\+S2keyboard for barcode scanner
+
+Definition at line 28 of file keyboard\+\_\+listener.\+cpp.
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{keyboard__listener_8cpp_a60449ab6e3cc483a69bbe369ea9f5aa7}\label{keyboard__listener_8cpp_a60449ab6e3cc483a69bbe369ea9f5aa7}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!cn@{cn}}
+\index{cn@{cn}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{cn}{cn}}
+{\footnotesize\ttfamily int cn = 0}
+
+
+
+Counter for \char`\"{}\+:\char`\"{}. 
+
+
+
+Definition at line 37 of file keyboard\+\_\+listener.\+cpp.
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_aa9fece7b062124080e4b2976f9a8b675}\label{keyboard__listener_8cpp_aa9fece7b062124080e4b2976f9a8b675}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!colPins@{colPins}}
+\index{colPins@{colPins}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{colPins}{colPins}}
+{\footnotesize\ttfamily byte col\+Pins\mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}{C\+O\+LS}}\mbox{]} = \{12, 11, 10, 9, 8\}}
+
+
+
+Pin map for columns for keypad. 
+
+
+
+Definition at line 18 of file keyboard\+\_\+listener.\+cpp.
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_a4d45508aaea1af22f73cbd9fa5525f33}\label{keyboard__listener_8cpp_a4d45508aaea1af22f73cbd9fa5525f33}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!keyboard@{keyboard}}
+\index{keyboard@{keyboard}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{keyboard}{keyboard}}
+{\footnotesize\ttfamily P\+S2\+Keyboard keyboard}
+
+
+
+Create instance of P\+S2\+Keyboard class. 
+
+
+
+Definition at line 26 of file keyboard\+\_\+listener.\+cpp.
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_a0e6c3cc7e8c762ab0ca1fa2296d7bbfe}\label{keyboard__listener_8cpp_a0e6c3cc7e8c762ab0ca1fa2296d7bbfe}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!keypad@{keypad}}
+\index{keypad@{keypad}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{keypad}{keypad}}
+{\footnotesize\ttfamily Keypad keypad = Keypad( make\+Keymap(\mbox{\hyperlink{keyboard__listener_8cpp_a856e873a1d14012d57ddb813c4a1e40a}{keys}}), \mbox{\hyperlink{keyboard__listener_8cpp_a6d6753e0ae098b31e2f84d4024e361cf}{row\+Pins}}, \mbox{\hyperlink{keyboard__listener_8cpp_aa9fece7b062124080e4b2976f9a8b675}{col\+Pins}}, \mbox{\hyperlink{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}{R\+O\+WS}}, \mbox{\hyperlink{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}{C\+O\+LS}})}
+
+
+
+Create keypad instance. 
+
+
+
+Definition at line 21 of file keyboard\+\_\+listener.\+cpp.
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_a856e873a1d14012d57ddb813c4a1e40a}\label{keyboard__listener_8cpp_a856e873a1d14012d57ddb813c4a1e40a}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!keys@{keys}}
+\index{keys@{keys}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{keys}{keys}}
+{\footnotesize\ttfamily char keys\mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}{R\+O\+WS}}\mbox{]}\mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_ab59ad2ee1a48b83c2eef1f019ed8cc48}{C\+O\+LS}}\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{= \{}
+\DoxyCodeLine{  \{\textcolor{charliteral}{'7'}, \textcolor{charliteral}{'8'}, \textcolor{charliteral}{'9'}, \textcolor{charliteral}{'\&'}, \textcolor{charliteral}{'C'}\},}
+\DoxyCodeLine{  \{\textcolor{charliteral}{'4'}, \textcolor{charliteral}{'5'}, \textcolor{charliteral}{'6'}, \textcolor{charliteral}{'X'}, \textcolor{charliteral}{'\string^'}\},}
+\DoxyCodeLine{  \{\textcolor{charliteral}{'1'}, \textcolor{charliteral}{'2'}, \textcolor{charliteral}{'3'}, \textcolor{charliteral}{'F'}, \textcolor{charliteral}{'v'}\},}
+\DoxyCodeLine{  \{\textcolor{charliteral}{'0'}, \textcolor{charliteral}{'.'}, \textcolor{charliteral}{'Q'}, \textcolor{charliteral}{'O'}, \textcolor{charliteral}{'/'}\}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+Keypad layout. 
+
+
+
+Definition at line 9 of file keyboard\+\_\+listener.\+cpp.
+
+\mbox{\Hypertarget{keyboard__listener_8cpp_a6d6753e0ae098b31e2f84d4024e361cf}\label{keyboard__listener_8cpp_a6d6753e0ae098b31e2f84d4024e361cf}} 
+\index{keyboard\_listener.cpp@{keyboard\_listener.cpp}!rowPins@{rowPins}}
+\index{rowPins@{rowPins}!keyboard\_listener.cpp@{keyboard\_listener.cpp}}
+\doxysubsubsection{\texorpdfstring{rowPins}{rowPins}}
+{\footnotesize\ttfamily byte row\+Pins\mbox{[}\mbox{\hyperlink{keyboard__listener_8cpp_a3cfd3aa62338d12609f6d65bce97e9cd}{R\+O\+WS}}\mbox{]} = \{A0, A1, A2, A3\}}
+
+
+
+Pin map for rows for keypad. 
+
+
+
+Definition at line 16 of file keyboard\+\_\+listener.\+cpp.
+
