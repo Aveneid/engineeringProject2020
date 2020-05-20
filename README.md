@@ -20,27 +20,32 @@ Do obsługi czujników i transmisji można wykorzystać dostępne biblioteki pro
 
 ## Instalation
 In `espmain/espMain.cpp` in line [726](https://github.com/Aveneid/engineeringProject2020/blob/master/espmain/espMain.cpp#L726) change `TEST` and `TEST1234` to your Wi-Fi BSSID and password.
-Compile file using for example Arduino IDE and upload to your device. There's also precopiled binary available.
+
+Compile files using for example Arduino IDE and upload to your device. There's also precompiled binary available.
 
 
 ### Wiring diagram
-
+Feel free to not stick hardly to this schema. This is an example wiring that is used in this project. You can always change pin configuration.
+![Wiring diagram](https://github.com/Aveneid/engineeringProject2020/blob/master/wiring_diagram.png?raw=true)
 
 ## Usage
 
-When device is powered for fisrt time, it will have to be configured using simple wizard.
+When device is powered for first time, it will have to be configured using simple wizard.
 
 For this step you will need:
 - RFID tag
-- pin code (max 8 characters)
+- pin code (max 8 characters, 0-9 only)
 
-When first run wizard ends, device is ready. It will accept cards, pin codes or barcodes (using scanner), checks if they are known and let someone in or not.
+When first run wizard ends, device is ready. It will accept cards, pin codes or barcodes (using scanner), checks if they are known and let someone in or not. After 3 incorrect tries device will **LOCK** for time defined by lock time (default 5 minutes).
+
+**:warning: Warning!** 
+Remember to change administrator password in admin panel! Default password is not secure!
 
 #### Adding or deleting cards
 
 First you have to obtain master access (with card / token used in first run wizard), then bring card near RFID module to scan it. If card is present in device storage - will be deleted, otherwise will be added.
 
-Cards can be deleted using administrator panel via WWW.
+Cards can be deleted using administrator panel via WWW too.
 
 #### Changing settings
 
@@ -84,3 +89,4 @@ All stored cards will be erased too! Be sure to add them after reset!
 
 ## License
 
+MIT
