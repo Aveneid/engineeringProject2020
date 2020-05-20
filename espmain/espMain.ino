@@ -266,7 +266,7 @@ void accessDenied() {
   lcd.setCursor(0, 1);
 }
 /**
-    function that provides `first run config` for owner / administrator
+*    function that provides `first run config` for owner / administrator
 **/
 
 void firstRunConfig() {
@@ -330,9 +330,9 @@ void firstRunConfig() {
   lcd.clear();
 }
 /**
-
-    WEB SERVER STUFF
-
+*
+*    function that handle user authentication via WWW 
+*
 **/
 bool auth() {
 
@@ -344,13 +344,22 @@ bool auth() {
   }
   return false;
 }
-
+/**
+ * 
+ * function that handles 404 error on server, applies when someone want to acces file (or path) that is not found
+ * 
+ */
 void handleNotFound() {
 
   String msg = "Not found\n\n";
   server.send(404, "text/plain", msg);
 }
 
+/*
+ * 
+ * function that handles admin password change for administrator panel via WWW, works only if user is admin
+ * 
+ */
 void changePass() {
   if (!auth) {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
@@ -369,6 +378,11 @@ void changePass() {
   }
   server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
 }
+/*
+ * 
+ * function that changes access pincode, works only if user is admin
+ * 
+ */
 void changePin() {
   if (!auth) {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
@@ -387,6 +401,10 @@ void changePin() {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
   }
 }
+/*
+ * 
+ * function that changes lock time(in minutes), works only if user is admin
+ */
 void changeLockTime() {
   if (!auth) {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
@@ -410,7 +428,12 @@ void changeLockTime() {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
   }
 }
-
+/**
+ * 
+ * function that handles main index file via WWW, prompts for password, if correct will redirect to admin panel
+ * 
+ * 
+ */
 void handleRoot() {
   String h = "";
   if (!auth()) {
@@ -437,6 +460,11 @@ void handleRoot() {
   server.sendContent(indexHTML6);
   server.send(200);
 }
+/*
+ * 
+ * function that dumps all saved cards to Serial port
+ * 
+ */
 void dumpCards() {
   int cardsCount = EEPROM.read(USERCARDSCOUNT);
   Serial.print(cardsCount);
@@ -448,6 +476,11 @@ void dumpCards() {
     }
   }
 }
+/*
+ * 
+ * function that delete card from storage if card is present, works only if user is admin
+ * 
+ */
 void del() {
   if (auth()) {
     if (server.hasArg("ID")) {
@@ -496,6 +529,11 @@ void del() {
     server.sendContent("HTTP/1.1 301 OK\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n");
   }
 }
+/*
+ * 
+ * function that handles admin panel login
+ * 
+ */
 void login() {
   String hd = "";
   if (server.hasArg("LOGOUT")) {
@@ -526,6 +564,11 @@ void login() {
     server.send(200, "text/html", "<html><body><form>Password: <input type='password' name='PASS'><input type='submit'></form></body></html>");
 
 }
+/*
+ * 
+ * function that toggles NFC, works only if user is admin
+ * 
+ */
 void toggleNFC() {
   if (auth()) {
     cfg[0] = !cfg[0];
@@ -537,6 +580,11 @@ void toggleNFC() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
+/*
+ * 
+ * function that toggles pin code, works only if user is admin
+ * 
+ */
 void togglePIN() {
   if (auth()) {
     cfg[1] = !cfg[1];
@@ -548,7 +596,11 @@ void togglePIN() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
-
+/*
+ * 
+ * funciton that toggles scanner, works only if user is admin
+ * 
+ */
 void toggleScanner() {
   if (auth()) {
     cfg[2] = !cfg[2];
@@ -560,7 +612,13 @@ void toggleScanner() {
     EEPROM.commit();
   } else server.sendContent("HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n");
 }
-
+/**
+ * 
+ * function that converts string in HEX format
+ * for example: AC:3D:FF:A0 to its DEC format
+ * like: 172:61:255:160
+ * 
+ */
 String h2i(String d) {
   String r = "";
   for (int i = 0; i < 4; i++) {
@@ -571,7 +629,12 @@ String h2i(String d) {
   return r;
 }
 
-
+/*
+ * 
+ * function that handles barcode scanner code check
+ * grants or denies access to protected zone 
+ * 
+ */
 void barcodeCheck(String code) {
   if (code.length() > 0) {
     code = h2i(code);
@@ -601,7 +664,7 @@ void barcodeCheck(String code) {
 
 
 /**
-    main setup function
+*    main setup function
 **/
 void setup() {
   //serial for barcode scanner
@@ -680,8 +743,8 @@ void setup() {
   Serial.flush();
 }
 /**
-    main loop function
-    provides control for RFID reader, password entry, admin access and others
+*    main loop function
+*   provides control for RFID reader, password entry, admin access and others
 **/
 void loop() {
 

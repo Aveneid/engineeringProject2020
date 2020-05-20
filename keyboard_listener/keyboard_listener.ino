@@ -23,16 +23,21 @@ SoftwareSerial bs(50, 4);
 PS2Keyboard keyboard;
 
 void setup() {
+  //start SoftwareSerial for keyboard
   bs.begin(9600);
+  //start Serial for barcode scanner
   Serial.begin(74880);
-  keyboard.begin(2, 3);
-  while (!Serial);
+  //start PS2keyboard for barcode scanner
+  scanner.begin(2, 3);
 }
 int cn = 0;
 void loop() {
-  if (keyboard.available()) {
-    char c = keyboard.read();
+  //Check if scanner is available
+  if (scanner.available()) {
+    //get character from scanner
+    char c = scanner.read();
     if (c != NULL) {
+
       if (c == PS2_ENTER) {
         Serial.println();
       } else if (c == PS2_TAB || c == PS2_ESC || c == PS2_PAGEDOWN ||
@@ -52,10 +57,11 @@ void loop() {
       }
     }
   }
-
+  //get key from Keypad
   char key = keypad.getKey();
   if (key != NO_KEY) {
     bs.print(key);
   }
+  //wait some time
   delay(10);
 }
