@@ -72,6 +72,7 @@ All stored cards will be erased too! Be sure to add them after reset!
  - keypad from [Nano E](https://nano.novitus.pl/)
  - Barcode scanner - compatible with PS/2 standard
  
+##[Documentation](https://aveneid.github.io/engineeringProject2020/)
 
 ### Libraries used
 
