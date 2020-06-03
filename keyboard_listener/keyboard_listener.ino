@@ -35,7 +35,7 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 /// Create instance of SoftwareSerial class, RX on pin 50 (unused), TX on 4 pin
 SoftwareSerial bs(50, 4);
 ///Create instance of PS2Keyboard class
-PS2Keyboard keyboard;
+PS2Keyboard scanner;
 
 void setup() {
   ///start SoftwareSerial for keyboard
