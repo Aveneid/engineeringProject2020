@@ -38,6 +38,8 @@ For this step you will need:
 
 When first run wizard ends, device is ready. It will accept cards, pin codes or barcodes (using scanner), checks if they are known and let someone in or not. After 3 incorrect tries device will **LOCK** for time defined by lock time (default 5 minutes).
 
+Video (https://drive.google.com/file/d/1IMRKisFa_bshOIxeV2hHRolmsU0VJJ5W/view?usp=sharing)[Google  Drive]
+
 **:warning: Warning!** 
 Remember to change administrator password in admin panel! Default password is not secure!
 
